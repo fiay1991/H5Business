@@ -1,0 +1,29 @@
+package com.park.h5business.controller;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+/**
+ * 通用页面跳转
+ * @author WangYuefei
+ *
+ */
+@Controller
+public class ForwardController {
+	
+	@RequestMapping(value="/plate",produces = "text/html;charset=UTF-8")
+	public String toPlate(HttpServletRequest request, Model model){
+		String parkid = request.getParameter("parkid");
+		model.addAttribute("parkid", parkid);
+		return "h5_plate";
+	}
+	
+	@RequestMapping(value="/platenew",produces = "text/html;charset=UTF-8")
+	public String toPlateNew(HttpServletRequest request, Model model){
+		String parkid = request.getParameter("parkid");
+		model.addAttribute("parkid", parkid);
+		return "h5_platenew";
+	}
+}

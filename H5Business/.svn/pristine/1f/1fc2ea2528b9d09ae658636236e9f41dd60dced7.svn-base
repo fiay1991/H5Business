@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html class="loading" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>无忧停车-选择车辆</title>
+<meta charset="UTF-8" />
+<meta name="keywords" content="无忧停车网,支付宝,停车,手机支付" />
+<meta name="description" content="无忧停车网携手支付宝 停车优惠打折" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta content="telephone=no" name="format-detection" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" id="links" />
+<link rel="stylesheet" th:href="@{/css/base.2.0.css}" />
+<link rel="stylesheet" th:href="@{/css/list.css}" />
+<script type="text/javascript">
+var oldS=document.getElementById("links");if(oldS){oldS.parentNode.removeChild(oldS)}var t=document.createElement("meta");if(/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)){t.content="width=320,maximum-scale=1.09,user-scalable=no"}else{if(/(Android)/i.test(navigator.userAgent)){t.content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"}else{t.content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"}}t.name="viewport";t.id="a1";document.getElementsByTagName("head")[0].appendChild(t);
+</script>
+</head>
+
+<body>
+<!--loading star-->
+<div id="loading_mask">
+    <div class="spinner"></div>
+</div>
+<!--loading end-->
+<header class="title">请选择要缴费的车辆:</header>
+<ul class="list" th:each="plate : ${plateList}">
+    <li><a th:href="@{/plate/platejump(parkid=${parkid},plate=${plate})}" th:text="${plate}"></a></li>
+</ul>
+
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+<script type="text/javascript">
+$(function(){
+    //预加载loading
+    $(window).bind('DOMContentLoaded',function(){
+            //400毫秒后执行，html对象移除loading样式
+            setTimeout(function(){                  
+                 $('html').removeClass('loading');
+            },400);
+    }); 
+}); 
+
+document.body.addEventListener('touchstart', function(){ }); 
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+.pay_info{ width:100%; margin:28px auto 100px;  }
+.pay_info .pic{ width:100%; margin:0 auto; text-align:center; }
+.pay_info .pic img{ width:105px; height:105px; margin:70px auto 10px; }
+.pay_info .pic .info{ font:400 24px/28px 'Microsoft YaHei'; color:#222; margin:0 0 3px;}
+.pay_info .pic .info_etc{ font:400 14px/28px 'Microsoft YaHei'; color:#7a7a7a; width:70%; margin:0 auto; }
+.pay_info .pic .info_etc2{ font:400 14px/22px 'Microsoft YaHei'; color:#7a7a7a; width:80%; margin:6px auto 0; }
+.pay_info .pic .info_etc2 .red{ color:#ff5b5b;font-weight:bold; font-size:16px;}
+.pay_info .pic .info2{ font:400 18px/28px 'Microsoft YaHei'; color:#222; margin:0 auto 3px; width:70%;}
+
+
+
+.infos{ text-align:left; overflow:hidden; color:#949494; width:96%; font-size:12px; clear:both; margin:0 0 0 3.5%}
+.infos .red{ color:#ec4f39; font-weight:bold; font-size:13px; margin:0 1px;}
+
+.action{ width:100%; height:130px; margin:-8px auto 26px;  }
+.action .btn-pay{margin-top:16px;font-size:19px;display:block; width:93%;  color:#ffffff; background:#ec4f39; border:none; height:51px; font-family:microsoft yahei; margin:15px auto 25px; text-align:center; line-height:51px; border-radius:4px; }
+.action .btn-pay a{ text-decoration:none;}
+.action .btn-pay:active{background:#e7412e;}
+.action .tis{ margin:0 auto; text-align:center; overflow:hidden;}
+.action .tis a{ color:#7b7b7b; text-align:center;  height:17px; padding-bottom:0px; border-bottom:1px solid #7b7b7b; margin:0 auto; overflow:hidden; display:inline-block;}
+
+
+.invoice a{ color:#eb4f39; text-decoration:none;  float:right; margin:-15px 5% 0 0; font-size:13px;}
+.invoice a:before{ content:""; background:url(../images/bill.png) no-repeat; background-size:16px 13px; display:inline-block; width:16px; height:13px; margin:2px 5px 0 0; float:left;}
+
+/* 兼容iphone5 */
+@media (device-height:568px) and (-webkit-min-device-pixel-ratio:2){
+	.invoice a{ color:#eb4f39; text-decoration:none;  float:right; margin:-15px 5% 0 0; font-size:13px;}
+	.invoice a:before{ content:""; background:url(../images/bill.png) no-repeat; background-size:16px 13px; display:inline-block; width:16px; height:13px; margin:3px 5px 0 0; float:left;}
+}
+
+/* 兼容iphone6 */
+@media (min-device-width : 375px) and (max-device-width : 667px) and (-webkit-min-device-pixel-ratio : 2){
+	.action{ width:100%; height:130px; margin:-8px auto 26px;  }
+	.invoice a{ color:#eb4f39; text-decoration:none;  float:right; margin:-15px 5% 0 0; font-size:13px;}
+	.invoice a:before{ content:""; background:url(../images/bill.png) no-repeat; background-size:16px 13px; display:inline-block; width:16px; height:13px; margin:3.5px 5px 0 0; float:left;}
+}
+
+.animat{
+	-webkit-animation: pulse1 0.8s ease both;
+	animation: pulse1 0.8s ease both;
+}
+
+@-webkit-keyframes pulse1{
+	0%{opacity:0;-webkit-transform:scale3d(.1,.1,.1);transform:scale3d(.1,.1,.1)}
+	
+	100%{opacity:1;-webkit-transform:scale3d(1,1,1);transform:scale3d(1,1,1)}
+}
+@keyframes pulse1{
+	0%{opacity:0;-webkit-transform:scale3d(.1,.1,.1);-ms-transform:scale3d(.1,.1,.1);transform:scale3d(.1,.1,.1)}
+	
+	100%{opacity:1;-webkit-transform:scale3d(1,1,1);-ms-transform:scale3d(1,1,1);transform:scale3d(1,1,1)}
+}
+
+.delay200 {
+	-webkit-animation-delay: .4s;
+	animation-delay: .4s;
+}

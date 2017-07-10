@@ -1,0 +1,3 @@
+spring.profiles.active = @profileActive@
+spring.profiles = dev,test,prod
+#server.context-path=/h

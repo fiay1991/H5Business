@@ -1,0 +1,126 @@
+body{ background-color:#F5F5F5; }
+
+.name{ width:100%; margin:35px auto 16px; text-align:center; color:#080808; font-size:18px;}
+
+.car_num{ border:0px solid #85a8cf; overflow:hidden; width:93%; margin:0 auto 30px; height:46px; display:block; display:-webkit-box; display:-moz-box;  text-align:center;}
+
+.car_num .car{ width:auto; height:50px;   -webkit-box-flex:1!important; -moz-box-flex:1;  text-align:center; display:block;  margin:0 8px 0 0; position:relative;  }
+.car_num .car:nth-child(1){margin:0 5px 0 0;}
+.car_num .car:nth-child(2){margin:0 14px 0 0;}
+.car_num .car:nth-child(2):after{ content: ""; width:8px; height:8px; background:#666; border-radius:50%;  position:absolute; display:block; right:-11px; top:18px; z-index:99; }
+.car_num .car:nth-child(7){ margin-right:0;}
+.car_num .car .text_input{ border:1px solid #d8d8d8; height:44px; text-align:center; color:#666; width:95%; font-size:19px; border-radius:0px; background:#fff; -webkit-box-flex:1!important; -moz-box-flex:1; -webkit-appearance:none;}
+.car_num .car .c_on{ border:1px solid #85a8cf; }
+
+
+
+.menu{ width:100%; margin:35px auto 0; background:#fff;  position:relative; overflow:hidden; background:#fff -webkit-gradient(linear, left top, left bottom, color-stop(.5, transparent), color-stop(.5, #E8E8E8), to(#E8E8E8)) left bottom repeat-x; background-size:100% 1px; padding:0 0 1px;}
+.menu .box{ width:98%; float:right; overflow:hidden; }
+
+
+
+.btn-pay{ margin-top:16px;font-size:18px;display:block; width:94.4%;  color:#ffffff; background:#ec4f39; border:none; height:46px;  margin:17px auto 10px; border-radius:3px;  display:-moz-box; cursor:pointer; font-weight:normal;}
+.btn-pay:active{background:#e7412e;}
+
+.switch{ text-align:right; margin:0 auto;  float:right; margin:0 2.8% 0 0;}
+.switch a{ color:#1294df;  text-decoration:none; display:inline-block; padding-bottom:0px; border-bottom:1px solid #1294df; height:16px;}
+
+/* 兼容iphone5 */
+@media (device-height:568px) and (-webkit-min-device-pixel-ratio:2){
+.switch a{ color:#1294df;  text-decoration:none; display:inline-block; padding-bottom:2px; border-bottom:1px solid #1294df; height:16px;}	
+}
+
+/* 兼容iphone6 */
+@media (min-device-width : 375px) and (max-device-width : 667px) and (-webkit-min-device-pixel-ratio : 2){
+.switch a{ color:#1294df;  text-decoration:none; display:inline-block; padding-bottom:2px; border-bottom:1px solid #1294df; height:16px;}	
+}
+
+.alert-page-keyboard{max-width:none; width:100%; z-index:999; visibility:visible; opacity:1;position:absolute;-khtml-user-select:none; -webkit-user-select:none; user-select:none; overflow:visible; position:absolute; bottom:0; left:0;}
+.text-keyboard-box{background-color:#e5e6e8;}
+.text-keyboard-box .keyboard-row:first-child{padding-top:6px}
+.text-keyboard-box .keyboard-row:last-child{padding-bottom:4px}
+.text-keyboard-box .keyboard-row .keyboard-char:first-child{margin-left:4px}
+.text-keyboard-box .keyboard-row .keyboard-char:last-child{margin-right:4px}
+.text-keyboard-box .keyboard-row:nth-child(4) .keyboard-char:first-child{margin-left:26px;}
+.text-keyboard-box .keyboard-row:nth-child(4) .keyboard-char:last-child{margin-right:26px}
+
+.keyboard-row{display:flex;display:-ms-flexbox;display:-webkit-box}
+.text-keyboard-box .keyboard-char .spot{border-radius:4px; margin:3px 2px; width:auto; background:#fff; min-width:24px;  display:box; display:-webkit-box;display:-moz-box; -webkit-box-pack:center;-webkit-box-align:center}
+.text-keyboard-box .keyboard-char .spot:active{background:#ec4f39; color:#fff; }
+
+
+
+
+
+
+
+/*主体*/
+.keyboard-char{height:50px; border:0; overflow:hidden; font-size:17px; text-align:center; line-height:43px; flex:1; -webkit-flex:1; -webkit-box-flex:1}
+
+.text-keyboard-box .keyboard-char .delete{ border-radius:4px; margin:3px 2px; width:auto; background:#139dec; min-width:24px;  display:box; display:-webkit-box;display:-moz-box; -webkit-box-pack:center;-webkit-box-align:center; background:#139dec url(../images/key-clear.png) no-repeat center 13px; background-size:17px 14px; color:
+#139dec; font-size:0px;}
+.text-keyboard-box .keyboard-char .delete:active{background:#1592da url(../images/key-clear.png) no-repeat center 13px; background-size:17px 14px;}
+/*.text-keyboard-box .keyboard-char .delete img{ width:17px; height:14px; }*/
+
+.load {
+    position: fixed;
+    left: 50%;
+    top: 45%;
+    width: 94px;
+    height: 94px;
+    margin: -47px 0 0 -47px;
+    line-height: 136px;
+    border-radius: 8px;
+    background-image: url(../images/loading.gif);
+    background-position: center 19px;
+    background-repeat: no-repeat;
+    background-size: 36px;
+    background-color: rgba(0, 0, 0, 0.80);
+    color: #fff;
+    text-align: center;
+    font-size: 12px;
+	z-index:9999;
+	display:none;
+	animation: fadeIn 0.6s;
+    
+}
+
+.sub_yes{
+    position: fixed;
+    left: 50%;
+    top: 45%;
+    width: 94px;
+    height: 94px;
+    margin: -47px 0 0 -47px;
+    line-height: 142px;
+    border-radius: 8px;
+    background-image: url(../images/succe.png);
+    background-position: center 12px;
+    background-repeat: no-repeat;
+    background-size: 46px;
+    background-color: rgba(0, 0, 0, 0.80);
+    color: #fff;
+    text-align: center;
+    font-size: 12px;
+	z-index:9999;
+	display:none;
+	animation: fadeIn 0.6s;  
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+	transform: scale3d(.8, .8, .8);
+  }
+  30% {
+    transform: scale3d(1.05, 1.05, 1.05);
+  }  
+  60% {
+    transform: scale3d(.97, .97, .97);
+  }  
+  to {
+    opacity: 1;
+	transform: scale3d(1, 1, 1);
+  }
+}
+.mask{ background-color:#000; background:rgba(0,0,0,.1); z-index:100;width:100%;height:100%;position:fixed;left:0;top:0; display:none; }
+

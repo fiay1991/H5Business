@@ -1,0 +1,22 @@
+package com.park.h5business.dao.impl;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.park.h5business.dao.OrderInfoDao;
+import com.park.h5business.domain.OrderInfo;
+import com.park.h5business.mapper.OrderInfoMapper;
+import com.park.h5business.vo.ScanpayVO;
+@Repository(value="orderInfoDaoImpl")
+public class OrderInfoDaoImpl implements OrderInfoDao {
+	
+	@Resource(name="orderInfoMapper")
+	private OrderInfoMapper orderInfoMapper;
+	
+	@Override
+	public OrderInfo getOrderInfo(ScanpayVO scanpayVO) {
+		return orderInfoMapper.getOrderInfo(scanpayVO);
+	}
+
+}

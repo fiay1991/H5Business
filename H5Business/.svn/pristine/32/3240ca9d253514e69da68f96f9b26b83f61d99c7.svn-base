@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html class="loading" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>无忧停车-输入车牌号</title>
+<meta charset="UTF-8" />
+<meta name="keywords" content="无忧停车网,支付宝,停车,手机支付" />
+<meta name="description" content="无忧停车网携手支付宝 停车优惠打折" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta content="telephone=no" name="format-detection" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<link rel="stylesheet" th:href="@{/css/base.2.0.css}" />
+<link rel="stylesheet" th:href="@{/css/car_num2.css}" />
+<script type="text/javascript">
+var oldS=document.getElementById("links");if(oldS){oldS.parentNode.removeChild(oldS)}var t=document.createElement("meta");if(/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)){t.content="width=320,maximum-scale=1.09,user-scalable=no"}else{if(/(Android)/i.test(navigator.userAgent)){t.content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"}else{t.content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"}}t.name="viewport";t.id="a1";document.getElementsByTagName("head")[0].appendChild(t);
+</script>
+</head>
+
+<body>
+<!--loading star-->
+<div id="loading_mask">
+    <div class="spinner"></div>
+</div>
+<!--loading end-->
+<!--加载 star-->
+<div class="load">查询中…</div>
+<!--加载 end-->
+<div class="mask"></div>
+<header class="name">请输入您的车牌号</header>
+<section class="car_num">
+<label class="car"><input type="text" name="" class="text_input c_on" id="car_province" readonly="readonly" /></label>
+<label class="car"><input type="text" name="" class="text_input" id="car_num1" readonly="readonly" /></label>
+<label class="car"><input type="text" name="" class="text_input" id="car_num2" readonly="readonly" /></label>
+<label class="car"><input type="text" name="" class="text_input" id="car_num3" readonly="readonly" /></label>
+<label class="car"><input type="text" name="" class="text_input" id="car_num4" readonly="readonly" /></label>
+<label class="car"><input type="text" name="" class="text_input" id="car_num5" readonly="readonly" /></label>
+<label class="car"><input type="text" name="" class="text_input" id="car_num6" readonly="readonly" /></label>
+<label class="car"><input type="text" name="" class="text_input" id="car_num7" readonly="readonly" /></label>
+</section>
+<div><button type="button" class="btn-pay" title="确认">确认</button></div>
+<p class="switch"><a th:href="@{/h5_plate}">输入普通车牌&gt;&gt;</a></p>
+
+
+
+<!--省份/直辖市 star-->
+<div class="alert-page-keyboard"  id="car_1" >
+<div class="text-keyboard-box">
+    <!--第一行 star-->
+    <div class="keyboard-row">
+    
+        <div class="keyboard-char">
+            <div class="spot">京</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">沪</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">粤</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">津</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">浙</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">苏</div>
+        </div>
+        
+        <div class="keyboard-char">
+            <div class="spot">冀</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">鲁</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">辽</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">吉</div>
+        </div>
+    
+
+    
+    </div>
+    <!--第一行 end-->
+
+    <!--第二行 star-->
+    <div class="keyboard-row">
+    
+        <div class="keyboard-char">
+            <div class="spot">黑</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">蒙</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">皖</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">闽</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">赣</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">豫</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">鄂</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">湘</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">晋</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">桂</div>
+        </div>
+        
+    </div>
+    <!--第二行 end-->
+    
+    <!--第三行 star-->
+    <div class="keyboard-row">
+        <div class="keyboard-char">
+            <div class="place"></div>
+        </div>  
+        <div class="keyboard-char">
+            <div class="spot">渝</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">川</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">贵</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">云</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">藏</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">陕</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">甘</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">青</div>
+        </div>
+        <div class="keyboard-char">
+            <div class="place"></div>
+        </div>  
+
+    </div>
+    <!--第三行 end-->
+    
+    <!--第四行 star-->
+    <div class="keyboard-row">
+        <div class="keyboard-char">
+            <div class="func"></div>
+        </div>
+        <div class="keyboard-char">
+            <div class="spot">琼</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">新</div>
+        </div>  
+        <div class="keyboard-char">
+            <div class="spot">港</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">澳</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">台</div>
+        </div>
+    
+        <div class="keyboard-char">
+            <div class="spot">宁</div>
+        </div>
+        <div class="keyboard-char">
+            <div class="func"></div>
+        </div>  
+    
+    </div>
+    <!--第四行 end-->
+</div>
+</div>
+<!--省份 end-->
+
+<!--车牌编号 star-->
+<div class="alert-page-keyboard" id="car_2" style="display:none;">
+    <div class="text-keyboard-box">
+        <!--第一行 star-->
+        <div class="keyboard-row">      
+            <div class="keyboard-char">
+                <div class="spot">1</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">2</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">3</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">4</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">5</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">6</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">7</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">8</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">9</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">0</div>
+            </div>  
+        </div>
+        <!--第一行 end-->
+        
+        <!--第二行 star-->
+        <div class="keyboard-row">
+        
+            <div class="keyboard-char">
+                <div class="spot">Q</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">W</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">E</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">R</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">T</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">Y</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">U</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">I</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">O</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">P</div>
+            </div>
+            
+        </div>
+        <!--第二行 end-->
+        
+        <!--第三行 star-->
+        <div class="keyboard-row">
+        
+            <div class="keyboard-char">
+                <div class="place"></div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">A</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">S</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">D</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">F</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">G</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">H</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">J</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">K</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">L</div>
+            </div>  
+        
+            <div class="keyboard-char">
+                <div class="place"></div>
+            </div>
+        </div>
+        <!--第三行 end-->
+        
+        <!--第四行 star-->
+        <div class="keyboard-row">
+    
+            <div class="keyboard-char">
+                <div class="func"></div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">Z</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">X</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">C</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">V</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">B</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">N</div>
+            </div>
+        
+            <div class="keyboard-char">
+                <div class="spot">M</div>
+            </div>
+            
+            <div class="keyboard-char">
+                <div class="delete">删除</div>
+            </div>
+            <div class="keyboard-char">
+                <div class="func"></div>
+            </div>
+    </div>
+        <!--第四行 end-->
+    </div>
+</div>
+<!--编号 end-->
+
+
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/tips.js}"></script>
+<script type="text/javascript" th:src="@{/js/fastclick.js}"></script>
+<script th:inline="javascript">
+
+$(function(){
+    //预加载loading
+    $(window).bind('DOMContentLoaded',function(){
+        //400毫秒后执行，html对象移除loading样式
+        setTimeout(function(){                  
+             $('html').removeClass('loading');
+        },400);
+    }); 
+
+    FastClick.attach(document.body);
+    
+//  $("#car_province").click(function(event){
+//      $("#car_1").show();
+//      $("#car_2").hide();
+//      $("#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+//  });
+    
+    $("#car_province").focus();
+    
+    //获取车牌省份值
+    var lis = $("#car_1 .spot");
+    for(var i=0;lis.length > i;i++){
+        lis[i].onclick = function(){    
+            $("#car_province").val($(this).html()); 
+            
+              if($("#car_province").val().length==1){
+                 $("#car_num1").focus();
+                 $("#car_num1").addClass("c_on");
+                 $("#car_province,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+                 $("#car_1").hide();
+                 $("#car_2").show();
+              }
+        }
+    }   
+    
+    
+    //获取车牌编号
+    var lis = $("#car_2 .spot");
+    for(var i=0;lis.length > i;i++){
+        lis[i].onclick = function(){    
+            
+             if($("#car_num1").val().length==""){
+                $("#car_num1").val($(this).html());
+                  if($("#car_num1").val().length==1){
+                    $("#car_num2").focus(); 
+                     $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+                     $("#car_num2").addClass("c_on");
+                  }else{                        
+                    $("#car_province").focus();
+                    $("#car_2").hide();
+                    $("#car_1").show();
+                  } 
+              }else if($("#car_num2").val().length==""){
+                $("#car_num2").val($(this).html());
+                  if($("#car_num2").val().length==1){
+                    $("#car_num3").focus(); 
+                    $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+                    $("#car_num3").addClass("c_on");
+                  }else{        
+                    $("#car_num1").focus();                 
+                  }                 
+              }else if($("#car_num3").val().length==""){
+                $("#car_num3").val($(this).html());
+                  if($("#car_num3").val().length==1){
+                    $("#car_num4").focus(); 
+                    $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+                    $("#car_num4").addClass("c_on");
+                  }else{        
+                    $("#car_num2").focus();                 
+                  } 
+              
+              }else if($("#car_num4").val().length==""){
+                $("#car_num4").val($(this).html());
+                  if($("#car_num4").val().length==1){
+                    $("#car_num5").focus(); 
+                    $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+                    $("#car_num5").addClass("c_on");
+                  }else{        
+                    $("#car_num3").focus();                 
+                  }           
+              
+              }else if($("#car_num5").val().length==""){
+                $("#car_num5").val($(this).html());
+                  if($("#car_num5").val().length==1){
+                    $("#car_num6").focus(); 
+                    $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+                    $("#car_num6").addClass("c_on");
+                
+                  }else{        
+                    $("#car_num4").focus();                 
+                  }     
+              }else if($("#car_num6").val().length==""){
+                $("#car_num6").val($(this).html());
+                  if($("#car_num6").val().length==1){
+                    $("#car_num7").focus(); 
+                    $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+                    $("#car_num7").addClass("c_on");
+                
+                  }else{        
+                    $("#car_num5").focus();                 
+                  }           
+              
+              }else if($("#car_num7").val().length=="" || $("#car_num7").val().length!=""){
+                $("#car_num7").val($(this).html());
+
+                 $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+                 $("#car_num7").addClass("c_on");             
+              
+              } 
+                
+        }
+    }
+    
+    
+    $("#car_2 .delete").click(function(event){
+        if($("#car_num7").val().length!=""){
+            $("#car_num7").val(""); 
+            $("#car_num7").focus();
+            
+            $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6").removeClass("c_on");
+            $("#car_num7").addClass("c_on");
+            
+        }else if($("#car_num6").val().length!=""){
+            $("#car_num6").val(""); 
+            $("#car_num6").focus();
+            
+            $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num7").removeClass("c_on");
+            $("#car_num6").addClass("c_on");        
+        
+        }else if($("#car_num5").val().length!=""){
+            $("#car_num5").val(""); 
+            $("#car_num5").focus();
+            $("#car_province,#car_num1,#car_num2,#car_num3,#car_num4,#car_num6,#car_num7").removeClass("c_on");
+            $("#car_num5").addClass("c_on");
+    
+            
+        }else if($("#car_num4").val().length!=""){
+            $("#car_num4").val(""); 
+            $("#car_num4").focus();
+            $("#car_province,#car_num1,#car_num2,#car_num3,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+            $("#car_num4").addClass("c_on");
+    
+        }else if($("#car_num3").val().length!=""){
+            $("#car_num3").val(""); 
+            $("#car_num3").focus();
+            $("#car_province,#car_num1,#car_num2,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+            $("#car_num3").addClass("c_on");
+
+        }else if($("#car_num2").val().length!=""){
+            $("#car_num2").val(""); 
+            $("#car_num2").focus();
+            $("#car_province,#car_num1,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+            $("#car_num2").addClass("c_on");
+
+        }else if($("#car_num1").val().length!=""){
+            $("#car_num1").val(""); 
+            $("#car_num1").focus();
+            $("#car_province,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+            $("#car_num1").addClass("c_on");
+    
+        }else if($("#car_province").val().length!=""){
+            $("#car_province").val(""); 
+            $("#car_province").focus();
+            $("#car_num1,#car_num2,#car_num3,#car_num4,#car_num5,#car_num6,#car_num7").removeClass("c_on");
+        
+            $("#car_province").addClass("c_on");
+            $("#car_2").hide();
+            $("#car_1").show();
+        }
+
+    });
+    
+});
+document.body.addEventListener('touchstart', function () { }); 
+
+//车牌查询提交
+$(".btn-pay").click(function(){
+    //车牌第一位
+    var car_num1=$("#car_province").val();
+    //车牌第二位
+    var car_num2=$("#car_num1").val();
+    //车牌第三位
+    var car_num3=$("#car_num2").val();
+    //车牌第四位
+    var car_num4=$("#car_num3").val();
+    //车牌第五位
+    var car_num5=$("#car_num4").val();  
+    //车牌第六位
+    var car_num6=$("#car_num5").val();
+    //车牌第七位
+    var car_num7=$("#car_num6").val();  
+    //车牌第八位
+    var car_num8=$("#car_num7").val();  
+        
+    //拼接完整车牌
+    var car_nums=car_num1+car_num2+car_num3+car_num4+car_num5+car_num6+car_num7+car_num8;
+    
+    //检测车牌位数
+    if(8 > car_nums.length){
+        show_err_msg("请输入完整车牌");
+        return false;
+    //否则
+    }else{
+    	var pathName=document.location.pathname;
+        var plate=car_nums;
+        var parkid=[[${session.parkid}]];
+        //执行AJAX
+        $.ajax({
+            type:"POST",
+            url:[[@{/plate/platejump}]],
+            dataType:'json',
+            data:{
+            	parkid:parkid,
+            	plate:plate
+            }, 
+            timeout:8000,                             //超时超时时间（8秒）
+            //在发送请求之前调用
+            beforeSend:function () {
+                $(".load").show();
+                $(".mask").show();
+            },  
+            
+            //成功
+            success: function (data) { 
+                //如果有数据
+                if(data.status_code=="200"){
+                    setTimeout(function(){  
+                        $(".load,.mask").hide();
+                        //url
+                        var win_url=pathName.substring(0,pathName.substr(1).indexOf('/')+1) + data.url; 
+                        show_msg('提交成功',win_url);   
+                    },200);             
+    
+                //查询无结果 
+                }else{
+                    setTimeout(function(){  
+                        $(".load,.mask").hide();
+                        window.location.href=pathName.substring(0,pathName.substr(1).indexOf('/')+1) + data.url;    
+                    },200);                         
+                }
+            },
+            //失败
+            error: function (jqXHR, textStatus, errorThrown){   
+                if(textStatus=="timeout"){
+                    $(".load,.mask").hide();
+                    show_err_msg("网络超时");
+                }else{
+                    $(".load,.mask").hide();
+                    show_err_msg("异常重试");
+                }       
+            }               
+        })      
+    }
+    
+    
+})
+
+</script>
+</body>
+
+
+</html>

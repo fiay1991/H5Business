@@ -1,0 +1,23 @@
+# SPRING PROFILES
+spring:       
+    # HTTP ENCODING
+    http:
+        encoding.charset: UTF-8
+        encoding.enable: true
+        encoding.force: true
+
+
+# Server settings
+server:
+    port:8080
+    address:localhost
+
+# MyBatis
+mybatis:
+    typeAliasesPackage: com.park.h5business.vo,com.park.h5business.domain
+    mapperLocations: classpath*:/mapper/*Mapper.xml
+    
+# LOGGING
+logging:
+    level:
+       com.ibatis:DEBUG

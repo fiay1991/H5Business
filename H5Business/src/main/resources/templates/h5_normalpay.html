@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="loading" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>无忧停车网</title>
+<meta charset="UTF-8" />
+<meta name="keywords" content="无忧停车网,手机支付" />
+<meta name="description" content="无忧停车手机支付二维码" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta content="telephone=no" name="format-detection" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" id="links" />
+<link rel="stylesheet" th:href="@{/css/base.2.0.css}" />
+<link rel="stylesheet" th:href="@{/css/parking.css?version=1.0}" />
+<!-- <script type="text/javascript" th:src="@{/js/url.js}"></script>  -->
+<script type="text/javascript">
+var oldS=document.getElementById("links");if(oldS){oldS.parentNode.removeChild(oldS)}var t=document.createElement("meta");if(/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)){t.content="width=320,maximum-scale=1.09,user-scalable=no"}else{if(/(Android)/i.test(navigator.userAgent)){t.content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"}else{t.content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"}}t.name="viewport";t.id="a1";document.getElementsByTagName("head")[0].appendChild(t);
+</script>
+</head>
+
+<body>
+
+<!--loading star-->
+<div id="loading_mask">
+	<div class="spinner"></div>
+</div>
+<!--loading end-->
+
+
+
+<div class="wapper">
+	<div class="sn-comment-box">
+	
+		<section class="conten">
+			<span class="billing">计费中</span>
+			<h2 class="name">停车费用</h2>
+			<div class="money"><em class="unit">￥</em><span th:text="${page.price}"></span></div>
+			<h3 class="while">停车时长</h3>
+			<div class="hour" th:text="${page.total_count}"></div>	
+		</section>
+		
+		<section class="status">
+		
+			<div class="arena">
+				<h3 class="orga">进场</h3>
+				<div class="date">&nbsp;<br/>&nbsp;<!-- <span th:text="${page.enter_time_date}"></span><br/><span th:text="${page.enter_time_time}"></span> --></div>
+			</div>
+			
+			<div class="line_yes"></div>
+			
+			<div class="solution">
+				<h3 class="orga"></h3>			
+			</div>
+			
+			<div class="line_no"></div>
+			 
+			<div class="appear">
+				<h3 class="orga_no">出场</h3>					
+			</div>
+			
+			<div class="car"></div>
+		</section>
+	
+		
+		<section class="expens">
+			<div class="box_content">	
+				<div class="discount">
+					<span class="title">停车场</span>
+					<div class="amount" th:text="${page.park_name}"></div>
+				</div>		
+				<div class="discount">
+					<span class="title">车牌号</span>
+					<div class="amount" th:if="${page.plate} =='null'" th:text="未识别"></div>
+					<div class="amount" th:if="${page.plate} &gt; 'null'" th:text="${page.plate}"></div>
+				</div>					
+				<div class="discount no">
+					<div class="sum">应付金额：<span class="red">￥<span th:text="${page.price}"></span></span></div>
+				</div>	
+			</div>
+			<div th:if="${page.price} &gt; 0.00"><button type="button" class="btn-pay" title="立即支付" onclick="pay()">立即支付</button></div>
+			<p th:if="${page.price} &gt; 0.00" class="prompt">缴费完成后，请在<span class="red">10钟之内</span>离场，超时需要补交停车费</p>
+			<div th:if="${page.price} ==0.00"><button type="button" class="btn-no" title="立即支付" >立即支付</button></div>
+			<p th:if="${page.price} == 0.00" class="prompt">您在免费时长内无需支付，请过了免费时长后再次扫码支付！</p>
+			
+		</section>
+	</div>
+</div>
+<span id="span" ></span>
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/fastclick.js}"></script>
+<script th:inline="javascript">
+	var unifiedorder=[[${unifiedorder}]];
+	var pages=[[${page}]];
+	var openid=[[${openid}]];
+	var terminal=[[${terminal}]];
+	var return_url =[[${return_url}]];
+		function pay(){
+			if(terminal =="WEIXIN"){
+				callpay();
+			}
+			if(terminal =="AliPay"){
+				document.getElementById("span").innerHTML=unifiedorder;
+				document.forms['punchout_form'].submit();
+			}
+		}
+		//执行支付
+		function callpay(){
+			//公众号名称ID
+			var appId = unifiedorder.appId;
+			//时间戳
+			var paytime = unifiedorder.timeStamp;
+			//随机串
+			var nonceStr=unifiedorder.nonceStr;
+			//订单详情扩展字符串
+			var packages="prepay_id="+unifiedorder.prepay_id;
+			//签名方式
+			var signType=unifiedorder.signType;
+			//微信签名
+			var paySign=unifiedorder.paySign;
+			//调用微信内置API支付接口
+			function onBridgeReady(){ 
+			   WeixinJSBridge.invoke(
+				   'getBrandWCPayRequest', {
+					   "appId" : appId,                  //公众号名称ID     
+					   "timeStamp": paytime,             //时间戳，自1970年以来的秒数     
+					   "nonceStr" : nonceStr,            //随机串     
+					   "package" : packages,               //订单详情扩展字符串
+					   "signType" : signType,               //微信签名方式     
+					   "paySign" : paySign               //微信签名 
+				   },
+				   
+				   function(res){  
+					   //接收成功返回值   
+					   if(res.err_msg == "get_brand_wcpay_request:ok" ) {	   
+						  //跳转到支付成功页面
+						 /*  var url =Url.TestBase.replace("ORDER",pages.order_num_pay);
+						  url=url.replace("PRICE",pages.price);
+						  url=url.replace("OPENID",openid);
+						  url=url.replace("PREID",unifiedorder.prepay_id); */
+						  window.location.href=return_url;
+						  }
+					}
+			   ); 
+			}	
+		//进行微信支付
+		if (typeof WeixinJSBridge == "undefined"){ 
+		   if( document.addEventListener ){
+			   document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+		   }else if (document.attachEvent){
+			   document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+			   document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+		   }
+		}else{
+		   onBridgeReady();
+		} 
+					
+	}
+</script>
+<script type="text/javascript">
+	$(function(){
+		//预加载loading
+		$(window).bind('DOMContentLoaded',function(){
+				//400毫秒后执行，html对象移除loading样式
+				setTimeout(function(){					
+	                 $('html').removeClass('loading');
+				},400);
+		});	
+		
+		//设置car滑动
+		var aa = $(".solution").offset().left;
+		setTimeout(function(){		
+			$(".car").stop(true).animate({left:aa+5,opacity:1},1200);
+		},200);
+		
+		FastClick.attach(document.body);
+	});
+	document.body.addEventListener('touchstart', function(){ }); 
+</script>
+</body>
+</html>

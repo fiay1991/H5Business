@@ -1,0 +1,76 @@
+package com.park.h5business.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.park.h5business.dao.OrderInfoDao;
+import com.park.h5business.service.PlateService;
+import com.park.h5business.tools.DateChangeTools;
+
+@Controller
+@RequestMapping("/plate")
+public class PlateController {
+	
+	@Resource(name ="plateServiceImpl")
+	private PlateService plateService;
+	
+	@Resource(name="orderInfoDaoImpl")
+	private OrderInfoDao orderInfoDao;
+	
+	/**
+	 * 输入车牌后提交地址
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value="/platejump",produces = "text/html;charset=UTF-8")
+	public String platejump(HttpServletRequest request,HttpServletResponse response,Model model){
+		Map<String, String> resultMap = new HashMap<String, String>();
+		String parkid = request.getParameter("parkid");//停车场id
+		String plate = request.getParameter("plate");//车牌号
+		//验证parkid是否为空，如果为空，从数据库查询parkid
+		if(parkid == null || parkid.equals("") || parkid.equals("null")){
+			parkid = orderInfoDao.getParkIdByPlate(plate);
+		}
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("parkid", parkid);
+		paramMap.put("plate", plate);
+		String orderNum = orderInfoDao.getOrder(paramMap);
+		//验证订单是否存在，若不存在，返回错误页面
+		if(orderNum == null || orderNum.equals("")){
+			resultMap.put("status_code", "403");
+			resultMap.put("plate", plate);
+			resultMap.put("url", "/noplate");
+			return DateChangeTools.bean2gson(resultMap);
+		}
+		resultMap.put("status_code", "200");
+		resultMap.put("url", "/plate/platepay?parkid=" + parkid + "&plate=" + plate);
+		return DateChangeTools.bean2gson(resultMap);
+	}
+	
+	/**
+	 * 输入车牌支付
+	 * 本请求为get请求
+	 * @return
+	 */
+	@RequestMapping(value="/platepay",produces = "text/html;charset=UTF-8")
+	public String platepay(HttpServletRequest request,HttpServletResponse response,Model model){
+		String parkid = request.getParameter("parkid");//停车场id
+		String plate = request.getParameter("plate");//车牌号
+		//如果parkid为空，从数据库中取parkid
+		if(parkid == null || parkid.equals("") || parkid.equals("null")){
+			parkid = orderInfoDao.getParkIdByPlate(plate);
+		}
+		String useragent = request.getHeader("user-agent");//主要区分微信/支付宝的标示
+		return plateService.platepay(parkid, plate, useragent, model);
+	}
+	
+}
