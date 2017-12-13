@@ -1,0 +1,30 @@
+package com.park.h5business.config;
+
+/**
+ * @author WangYuefei
+ * 时间：2017年11月28日
+ * 功能：支付的状态
+ * 备注：与PayCenter保持一致
+ */
+
+public class PayStatusConfig {
+	
+	/**
+	 * 未支付
+	 */
+	public static final String INTRADING = "INTRADING";
+	/**
+	 * 支付失败
+	 */
+	public static final String NPAY = "FAIL";
+	
+	/**
+	 * 支付成功
+	 */
+	public static final String YPAY = "SUCCESS";
+	
+	/**
+	 * 交易关闭
+	 */
+	public static final String OFFPAY = "OFF";
+}

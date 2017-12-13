@@ -3,14 +3,13 @@
 
 <mapper namespace="com.park.h5business.mapper.OrderInfoMapper">
 
-	<!-- <select id="getOrderInfo" parameterType="ScanpayVO" resultMap="orderInfoResultMap">
-		SELECT id, order_num, cp_park_id, plate_number, card_id, ticket_id, uid, car_type, enter_time, exit_time, cost_before, cost_after, discount_amount, prepay_amount, prepay_time, ordertype, card_type, pay_method, service_status, pay_status, create_time, update_time
-		FROM cp_order_info
-		WHERE 1=1
-		<if test="parkid != null and parkid != '' "> AND cp_order_info.cp_park_id=#{parkid} </if>
-		<if test="ticketid !=null and ticketid != '' "> AND cp_order_info.ticket_id=#{ticketid}</if>
-		<if test="plate !=null and plate != '' and plate != 'null' "> AND cp_order_info.plate_number=#{plate}</if>
-	</select> -->
+	<select id="getScanpayvoByOrdernum" resultType="ScanpayVO">
+		SELECT cp_park_id parkid, ticket_id ticketid, 
+			plate_number plate, order_num orderid 
+		FROM cp_order_info 
+		WHERE order_num=#{order_num}
+	</select>
+
 	<select id="getOrderInfo" parameterType="ScanpayVO" resultMap="orderInfoResultMap">
 	    SELECT id, order_num, cp_park_id, plate_number, card_id, 
 			ticket_id, uid, car_type, enter_time, exit_time, 
@@ -20,7 +19,7 @@
         FROM cp_order_info
         WHERE 1 = 1
         <if test="parkid != null and parkid != '' "> AND cp_park_id = #{parkid} </if>
-        <if test="plate != null and plate != '' "> AND plate_number = #{plate} </if>
+        <if test="plate != null and plate != ''  and plate != 'null'"> AND plate_number = #{plate} </if>
         <if test="ticketid != null and ticketid != '' "> AND ticket_id = #{ticketid} </if>
         ORDER BY create_time DESC LIMIT 1
 	</select>
@@ -51,7 +50,21 @@
         SELECT order_num FROM cp_order_info 
         WHERE 1 = 1 
         <if test="parkid != null and parkid != '' "> AND cp_park_id = #{parkid} </if>
-        <if test="plate != null and plate != '' "> AND plate_number = #{plate} </if>
+        <if test="plate != null and plate != ''  and plate != 'null'"> AND plate_number = #{plate} </if>
         ORDER BY create_time DESC LIMIT 1
     </select>
+    
+    <update id="updateOrderPayInfo">
+    	UPDATE cp_order_info 
+    	<set>
+    		<if test="cost_before != null and cost_before != ''">cost_before = cost_before + #{cost_before},</if>
+    		<if test="cost_after != null and cost_after != ''">cost_after = cost_after + #{cost_after},</if>
+    		<if test="discount_amount != null and discount_amount != ''">discount_amount = discount_amount + #{discount_amount},</if>
+    		<if test="prepay_amount != null and prepay_amount != ''">prepay_amount = prepay_amount + #{prepay_amount},</if>
+    		<if test="prepay_time != null and prepay_time != ''">prepay_time = #{prepay_time},</if>
+    		<if test="pay_method != null and pay_method != ''">pay_method = #{pay_method},</if>
+    	</set>
+    	WHERE order_num = #{order_num}
+    </update>
+    
 </mapper>

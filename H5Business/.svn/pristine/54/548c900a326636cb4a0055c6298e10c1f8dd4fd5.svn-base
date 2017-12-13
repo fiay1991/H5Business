@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.h5business.mapper.OrderInfoMapper">
+
+	<select id="getScanpayvoByOrdernum" resultType="ScanpayVO">
+		SELECT cp_park_id parkid, ticket_id ticketid, 
+			plate_number plate, order_num orderid 
+		FROM cp_order_info 
+		WHERE order_num=#{order_num}
+	</select>
+
+	<select id="getOrderInfo" parameterType="ScanpayVO" resultMap="orderInfoResultMap">
+	    SELECT id, order_num, cp_park_id, plate_number, card_id, 
+			ticket_id, uid, car_type, enter_time, exit_time, 
+			cost_before, cost_after, discount_amount, prepay_amount, 
+			prepay_time, ordertype, card_type, pay_method, service_status, 
+			pay_status, create_time, update_time
+        FROM cp_order_info
+        WHERE 1 = 1
+        <if test="parkid != null and parkid != '' "> AND cp_park_id = #{parkid} </if>
+        <if test="plate != null and plate != ''  and plate != 'null'"> AND plate_number = #{plate} </if>
+        <if test="ticketid != null and ticketid != '' "> AND ticket_id = #{ticketid} </if>
+        ORDER BY create_time DESC LIMIT 1
+	</select>
+	
+	<resultMap id="orderInfoResultMap" type="OrderInfo">
+		<!-- 用id属性来映射主键字段 -->
+		<id property="id" column="id"/>
+		<!-- 用result属性来映射非主键字段 -->
+		<result property="order_num" column="order_num"/>
+		<result property="uid" column="uid"/>
+		<result property="service_status" column="service_status"/>
+		<result property="enter_time" column="enter_time"/>
+		<!-- 关联park表查询车场名称 -->
+		<association property="park_name" column="cp_park_id" select="getParkNameById"/>
+	</resultMap>
+
+	<select id="getParkNameById" parameterType="int" resultType="String">
+		SELECT cp_park.`name` FROM cp_park WHERE cp_park_id = #{parkid}
+	</select>
+	
+	<select id="getParkIdByPlate" resultType="string">
+	    SELECT cp_park_id FROM cp_order_info 
+	    WHERE plate_number = #{plate} 
+        ORDER BY create_time DESC LIMIT 1
+	</select>
+	
+    <select id="getOrder" resultType="string">
+        SELECT order_num FROM cp_order_info 
+        WHERE 1 = 1 
+        <if test="parkid != null and parkid != '' "> AND cp_park_id = #{parkid} </if>
+        <if test="plate != null and plate != ''  and plate != 'null'"> AND plate_number = #{plate} </if>
+        ORDER BY create_time DESC LIMIT 1
+    </select>
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.h5business.mapper.OrderPayRecordMapper">
+
+	<select id="getStatusByOrderNumPay" resultType="int">
+		SELECT pay_status FROM cp_order_pay_record 
+		WHERE order_num_pay = #{order_num_pay}
+	</select>
+
+	<insert id="add" parameterType="OrderPayRecord">
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID() AS id
+		</selectKey>
+		INSERT INTO
+		cp_order_pay_record(order_num,order_num_pay,cost_before,cost_after,discount_amount,pay_status,pay_way,create_time,update_time,openid,transaction_id)
+		          VALUES(#{order_num},#{order_num_pay},#{cost_before},#{cost_after},#{discount_amount},#{pay_status},#{pay_way},#{create_time},#{update_time},#{openid},#{transaction_id})
+	</insert>
+	
+	<select id="getParkId" parameterType="String" resultType="String">
+		SELECT info.cp_park_id FROM cp_order_pay_record  re
+		LEFT JOIN cp_order_info info
+		ON  re.order_num =info.order_num
+		WHERE re.order_num_pay = #{order_num}
+	</select>
+	
+	<select id="getOrderPayRecord" parameterType="String" resultType="OrderPayRecord">
+		SELECT 
+			* 
+		FROM cp_order_pay_record  re
+		WHERE re.order_num_pay = #{order_num}
+	</select>
+</mapper>

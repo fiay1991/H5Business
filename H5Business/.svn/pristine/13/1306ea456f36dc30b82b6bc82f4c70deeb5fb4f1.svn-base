@@ -1,0 +1,17 @@
+package com.park.h5business.service.cardpay;
+
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+@Repository(value="microPayService")
+public interface CardPayService {
+
+	/**
+	 * 刷卡支付下单方法
+	 * @param paramMap
+	 * @return
+	 */
+	String pay(Map<String, String> paramMap);
+	
+}

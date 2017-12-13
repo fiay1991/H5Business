@@ -78,7 +78,7 @@ var oldS=document.getElementById("links");if(oldS){oldS.parentNode.removeChild(o
 				</div>	
 			</div>
 			<div th:if="${page.price} &gt; 0.00"><button type="button" class="btn-pay" title="立即支付" onclick="pay()">立即支付</button></div>
-			<p th:if="${page.price} &gt; 0.00" class="prompt">缴费完成后，请在<span class="red">10钟之内</span>离场，超时需要补交停车费</p>
+			<p th:if="${page.price} &gt; 0.00" class="prompt">缴费完成后，请在<span class="red">15分钟之内</span>离场，超时需要补交停车费</p>
 			<div th:if="${page.price} ==0.00"><button type="button" class="btn-no" title="立即支付" >立即支付</button></div>
 			<p th:if="${page.price} == 0.00" class="prompt">您在免费时长内无需支付，请过了免费时长后再次扫码支付！</p>
 			
