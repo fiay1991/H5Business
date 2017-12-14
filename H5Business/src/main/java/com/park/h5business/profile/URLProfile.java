@@ -16,9 +16,30 @@ public class URLProfile {
 	private String WEIXINAPPSECRET;
 	private String FINDORDER;
 	private String RETURNURL;
-	private String EINVOICE;
 	private String WXRETURNURL;
+	private String ALIPAYAPPID;
+	private String ALIPAYPRIVATEKEY;
+	private String ALIPAYALIPUBLICKEY;
+	private String EINVOICE;
 	
+	public String getALIPAYAPPID() {
+		return ALIPAYAPPID;
+	}
+	public void setALIPAYAPPID(String aLIPAYAPPID) {
+		ALIPAYAPPID = aLIPAYAPPID;
+	}
+	public String getALIPAYPRIVATEKEY() {
+		return ALIPAYPRIVATEKEY;
+	}
+	public void setALIPAYPRIVATEKEY(String aLIPAYPRIVATEKEY) {
+		ALIPAYPRIVATEKEY = aLIPAYPRIVATEKEY;
+	}
+	public String getALIPAYALIPUBLICKEY() {
+		return ALIPAYALIPUBLICKEY;
+	}
+	public void setALIPAYALIPUBLICKEY(String aLIPAYALIPUBLICKEY) {
+		ALIPAYALIPUBLICKEY = aLIPAYALIPUBLICKEY;
+	}
 	public String getPHPSERVER() {
 		return PHPSERVER;
 	}

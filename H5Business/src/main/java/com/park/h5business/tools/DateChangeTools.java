@@ -1,10 +1,13 @@
 package com.park.h5business.tools;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -109,5 +112,64 @@ public class DateChangeTools{
 	public static <T> Map<String, String> json2Map(String params) {
         Gson gson =new Gson();
         return (Map)gson.fromJson(params, new TypeToken<T>() {}.getType());
-    } 
+    }
+
+	/**
+	 * bean转有序gson
+	 * @param <T>
+	 */
+	public static String map2SortJSON(Map<String, String> map){
+		StringBuffer resultString = new StringBuffer();
+		resultString.append('{');
+		List<String> keys = new ArrayList<String>(map.keySet());
+		Collections.sort(keys);
+		for (int i = 0; i < keys.size(); i++) {
+			String key = keys.get(i);
+			String value = map.get(key);
+			if (StringUtils.isBlank(value)) {
+				continue;
+			}else {
+				resultString.append('"');
+				resultString.append(key);
+				resultString.append('"');
+				resultString.append(':');
+				if(isNumeric(value) && value.length() < 12) {
+					resultString.append(value);
+				}else {
+					resultString.append('"');
+					resultString.append(value);
+					resultString.append('"');
+				}
+				if(i < keys.size()-1) {
+					resultString.append(',');
+				}
+			}
+		}
+		resultString.append('}');
+		return resultString.toString();
+	}
+	
+	/**
+     * 匹配是否包含数字
+     * @param str 可能为中文，也可能是-19162431.1254，不使用BigDecimal的话，变成-1.91624311254E7
+     * @return
+     * @author yutao
+     * @date 2016年11月14日下午7:41:22
+     */
+    public static boolean isNumeric(String str) {
+        // 该正则表达式可以匹配所有的数字 包括负数
+        Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
+        String bigStr;
+        try {
+            bigStr = new BigDecimal(str).toString();
+        } catch (Exception e) {
+            return false;//异常 说明包含非数字。
+        }
+
+        Matcher isNum = pattern.matcher(bigStr); // matcher是全匹配
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
 }
