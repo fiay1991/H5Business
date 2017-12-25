@@ -1,0 +1,128 @@
+package com.park.scanpay.service.aliparking.impl;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.park.base.common.HttpTools;
+import com.park.base.common.constants.PublicKeyConstants;
+import com.park.scanpay.config.ProjectConfig;
+import com.park.scanpay.profile.URLProfile;
+import com.park.scanpay.response.AliAuthReponse;
+import com.park.scanpay.response.PayCenterObject;
+import com.park.scanpay.response.TokenReponse;
+import com.park.scanpay.service.aliparking.SPIService;
+import com.park.scanpay.tools.DateChangeTools;
+import com.park.scanpay.tools.RSATools;
+
+/**
+ * 
+ * @author WangYuefei
+ * @time 2017/12/14
+ * @function 支付宝停车系统SPI接口
+ * 
+ */
+@Repository(value="spiServiceImpl")
+public class SPIServiceImpl implements SPIService {
+	
+	private Logger logger = LoggerFactory.getLogger(getClass());
+	
+	@Autowired
+	URLProfile urlProfile;
+
+	@Override
+	public String getCarNumber(String auth_code, String car_id) {
+		Map<String, String> accessTokenAndUserIdMap = getAccAndUserid(auth_code);
+		String access_token = accessTokenAndUserIdMap.get("access_token");
+		String carNumberResult = getCarNumberRequest(access_token, car_id);
+		PayCenterObject payCenterObj = DateChangeTools.gson2bean(carNumberResult, PayCenterObject.class);
+		String code = payCenterObj.getResult_code();
+		if("2000".equals(code)) {
+			Map<String, String> payCenterMap = DateChangeTools.json2Map(DateChangeTools.bean2gson(payCenterObj.getObject()));
+			return payCenterMap.get("car_number");
+		}
+		return null;
+	}
+	
+	public String getCarNumberRequest(String access_token, String car_id) {
+		String requestURL = urlProfile.getPayCenter() + "car/getcarnumber";
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("access_token", access_token);
+		paramMap.put("car_id", car_id);
+		String result = HttpTools.pidPost(paramMap, requestURL, PublicKeyConstants.PayCenter, ProjectConfig.ScanPay);
+		logger.error("** 获取车牌号返回结果:" + result);
+		if (null ==result ||  "".equals(result)) {
+			logger.error("** 获取车牌号返回结果为空。");
+			result="";
+		}
+		return result;
+	}
+	
+	/**
+	 * 获取支付宝access_token和user_id
+	 * @param alicode
+	 * @return
+	 */
+	public Map<String, String> getAccAndUserid(String alicode){
+		logger.info("** 支付宝请求(获取access_token) - 参数：" + alicode);
+		// REDIS操作结束
+		String aliInfoUrl = "https://openapi.alipay.com/gateway.do";
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("app_id", urlProfile.getALIPAYAPPID());
+		paramMap.put("method", "alipay.system.oauth.token");
+		paramMap.put("sign_type", "RSA2");
+		paramMap.put("version", "1.0");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String timestamp = sdf.format(new Date());
+		paramMap.put("timestamp", timestamp);
+		paramMap.put("charset", "UTF-8");
+		paramMap.put("code", alicode);
+		paramMap.put("grant_type", "authorization_code");
+		String linkStringForSign = DateChangeTools.createLinkString(paramMap);
+		logger.info("** 支付宝获取access_token预发送参数：" + linkStringForSign);
+		String sign = RSATools.sign(linkStringForSign, urlProfile.getALIPAYPRIVATEKEY());
+		paramMap.put("sign", sign);
+		try {
+			sign = URLEncoder.encode(sign, "UTF-8");
+			paramMap.put("sign", sign);
+			timestamp = URLEncoder.encode(timestamp, "UTF-8");
+			paramMap.put("timestamp", timestamp);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		String result = HttpTools.HttpClientGet(aliInfoUrl, DateChangeTools.createLinkString(paramMap), null);
+		AliAuthReponse aliAuthReponse = DateChangeTools.gson2bean(result, AliAuthReponse.class);
+		logger.info("** 支付宝获取access_token返回结果：" + result);
+		TokenReponse alipayOauthResponse = aliAuthReponse.getAlipay_system_oauth_token_response();
+		Map<String, String> resultMap = new HashMap<String, String>();
+		resultMap.put("access_token", alipayOauthResponse.getAccess_token());
+		resultMap.put("alipay_user_id", alipayOauthResponse.getAlipay_user_id());
+		resultMap.put("expires_in", alipayOauthResponse.getExpires_in());
+		resultMap.put("re_expires_in", alipayOauthResponse.getRe_expires_in());
+		resultMap.put("refresh_token", alipayOauthResponse.getRefresh_token());
+		resultMap.put("user_id", alipayOauthResponse.getUser_id());
+		String verifyString = DateChangeTools.map2SortJSON(resultMap);
+		boolean verify = RSATools.verify(verifyString, aliAuthReponse.getSign(), urlProfile.getALIPAYALIPUBLICKEY());
+		if(!verify) {
+			logger.info("** 支付宝获取access_token返回结果验签失败！");
+			return null;
+		}
+		TokenReponse aliInfo = aliAuthReponse.getAlipay_system_oauth_token_response();
+		String user_id = aliInfo.getUser_id();
+		String access_token = aliInfo.getAccess_token();
+		logger.info("** 支付宝获取access_token返回结果验签成功，user_id=" + user_id + "，access_token=" + access_token);
+		Map<String, String> returnMap = new HashMap<String, String>();
+		returnMap.put("user_id", user_id);
+		returnMap.put("access_token", access_token);
+		return returnMap;
+	}
+
+}

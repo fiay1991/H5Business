@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD  Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<!-- 类的别名，定义别名后使用时不需要一大串包名的类全名 -->
+	<typeAliases>
+		<!-- liuyang -->
+		<typeAlias alias="Demo" type="com.park.scanpay.domain.Demo" />
+		<typeAlias alias="ScanpayVO" type="com.park.scanpay.vo.ScanpayVO" />
+		<typeAlias alias="OrderInfo" type="com.park.scanpay.domain.OrderInfo"/>
+		<typeAlias alias="OrderPayRecord" type="com.park.scanpay.domain.OrderPayRecord"/>
+		<typeAlias alias="NoPlateRecord" type="com.park.scanpay.domain.noplate.NoPlateRecord"/>
+	</typeAliases>
+</configuration>

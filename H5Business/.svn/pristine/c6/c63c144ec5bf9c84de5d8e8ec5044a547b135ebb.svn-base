@@ -1,0 +1,47 @@
+package com.park.scanpay.dao.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.park.scanpay.dao.OrderPayRecordDao;
+import com.park.scanpay.domain.OrderPayRecord;
+import com.park.scanpay.mapper.OrderPayRecordMapper;
+@Repository(value="orderPayRecordDaoImpl")
+public class OrderPayRecordDaoImpl implements OrderPayRecordDao {
+	@Resource(name="orderPayRecordMapper")
+	private OrderPayRecordMapper orderPayRecordMapper;
+	@Override
+	public int add(OrderPayRecord orderPayRecord) {
+		return orderPayRecordMapper.add(orderPayRecord);
+	}
+
+	public String getParkId(String order_num){
+		return orderPayRecordMapper.getParkId(order_num);
+	}
+
+	public OrderPayRecord getOrderPayRecord(String order_num) {
+		return orderPayRecordMapper.getOrderPayRecord(order_num);
+	}
+
+	@Override
+	public Integer getStatusByOrderNumPay(String order_num_pay) {
+		return orderPayRecordMapper.getStatusByOrderNumPay(order_num_pay);
+	}
+
+	@Override
+	public int updateStatus(String order_num_pay, String status) {
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("order_num_pay", order_num_pay);
+		paramMap.put("status", status);
+		return orderPayRecordMapper.updateStatus(paramMap);
+	}
+
+	@Override
+	public int updateOrderPayRecord(Map<String, String> paramMap) {
+		return orderPayRecordMapper.updateOrderPayRecord(paramMap);
+	}
+}

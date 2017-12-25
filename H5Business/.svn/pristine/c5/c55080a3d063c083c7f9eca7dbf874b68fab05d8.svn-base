@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.scanpay.mapper.ParkMapper">
+
+	<select id="getParkKey" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT park_key 
+		FROM cp_park
+		WHERE cp_park_id=#{value}
+	</select>
+</mapper>

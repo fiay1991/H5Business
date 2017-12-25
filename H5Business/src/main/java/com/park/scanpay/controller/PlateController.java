@@ -1,0 +1,103 @@
+package com.park.scanpay.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.park.scanpay.domain.OrderInfo;
+import com.park.scanpay.service.CloudCoreService;
+import com.park.scanpay.service.PlateService;
+import com.park.scanpay.tools.DateChangeTools;
+
+@Controller
+@RequestMapping("/plate")
+public class PlateController {
+	
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	@Resource(name ="plateServiceImpl")
+	private PlateService plateService;
+	
+	@Resource(name="cloudCoreServiceImpl")
+	private CloudCoreService cloudCoreService;
+	
+	/**
+	 * 输入车牌后提交地址
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value="/platejump",produces = "text/html;charset=UTF-8")
+	public String platejump(HttpServletRequest request,HttpServletResponse response,Model model){
+		Map<String, String> resultMap = new HashMap<String, String>();
+		String parkid = request.getParameter("parkid");//停车场id
+		String plate = request.getParameter("plate");//车牌号
+		// 通过车牌号查询订单数据
+		OrderInfo orderInfo = cloudCoreService.findOrderByPlate(parkid, plate);
+		//验证订单是否存在，若不存在，返回错误页面
+		if(orderInfo == null){
+			logger.info("** 手输车牌号，未找到该订单：parkid=" + parkid + "，plate=" + plate);
+			resultMap.put("status_code", "403");
+			resultMap.put("plate", plate);
+			resultMap.put("url", "/noplate");
+			return DateChangeTools.bean2gson(resultMap);
+		}
+		parkid = orderInfo.getParkId();
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("parkid", parkid);
+		paramMap.put("plate", plate);
+		logger.info("** 手输车牌号，已找到订单：parkid=" + parkid + "，plate=" + plate);
+		resultMap.put("status_code", "200");
+		resultMap.put("url", "/plate/platepay?parkid=" + parkid + "&plate=" + plate);
+		return DateChangeTools.bean2gson(resultMap);
+	}
+	
+	@RequestMapping(value="/platesjump",produces = "text/html;charset=UTF-8")
+	public String platesjump(HttpServletRequest request,HttpServletResponse response,Model model){
+		String parkid = request.getParameter("parkid");//停车场id
+		String plate = request.getParameter("plate");//车牌号
+		// 通过车牌号查询订单数据
+		OrderInfo orderInfo = cloudCoreService.findOrderByPlate(parkid, plate);
+		if(orderInfo == null){
+			logger.info("** 选择车牌号，未找到该订单：parkid=" + parkid + "，plate=" + plate);
+			model.addAttribute("plate", plate);
+			return "h5_noplate";
+		}
+		parkid = orderInfo.getParkId();
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("parkid", parkid);
+		paramMap.put("plate", plate);
+		logger.info("** 选择车牌号，已找到订单：parkid=" + parkid + "，plate=" + plate);
+		return "forward:platepay";
+	}
+	
+	/**
+	 * 输入车牌支付
+	 * 本请求为get请求
+	 * @return
+	 */
+	@RequestMapping(value="/platepay",produces = "text/html;charset=UTF-8")
+	public String platepay(HttpServletRequest request,HttpServletResponse response,Model model){
+		String parkid = request.getParameter("parkid");//停车场id
+		String plate = request.getParameter("plate");//车牌号
+		//如果parkid为空，从数据库中取parkid
+		if(parkid == null || parkid.equals("") || parkid.equals("null")){
+			OrderInfo orderInfo = cloudCoreService.findOrderByPlate(null, plate);
+			if(null != orderInfo) {
+				parkid = orderInfo.getParkId();
+			}
+		}
+		String useragent = request.getHeader("user-agent");//主要区分微信/支付宝的标示
+		return plateService.platepay(parkid, plate, useragent, model);
+	}
+	
+}

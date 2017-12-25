@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Implementation-Title: H5Business Maven Webapp
+Implementation-Title: ScanPay
 Implementation-Version: 0.0.1-SNAPSHOT
 Built-By: 15647
 Implementation-Vendor-Id: com.park

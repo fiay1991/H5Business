@@ -14,7 +14,7 @@ server:
 
 # MyBatis
 mybatis:
-    typeAliasesPackage: com.park.h5business.vo,com.park.h5business.domain
+    typeAliasesPackage: com.park.scanpay.vo,com.park.scanpay.domain
     mapperLocations: classpath*:/mapper/*Mapper.xml
     
 # LOGGING

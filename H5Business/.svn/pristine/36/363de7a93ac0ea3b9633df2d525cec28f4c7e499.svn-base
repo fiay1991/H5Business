@@ -1,0 +1,172 @@
+package com.park.scanpay.service.cardpay.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.park.scanpay.config.ParkConfig;
+import com.park.scanpay.config.constants.CodeConstants;
+import com.park.scanpay.domain.OrderPayRecord;
+import com.park.scanpay.profile.URLProfile;
+import com.park.scanpay.response.OrderResponse;
+import com.park.scanpay.service.CloudCoreService;
+import com.park.scanpay.service.PHPCommService;
+import com.park.scanpay.service.PullOrderService;
+import com.park.scanpay.service.cardpay.CardPayService;
+import com.park.scanpay.tools.DateChangeTools;
+import com.park.scanpay.tools.DateTools;
+import com.park.scanpay.tools.OrderNumTools;
+import com.park.scanpay.tools.ResultTools;
+import com.park.scanpay.vo.ScanpayVO;
+
+@Repository(value="cardPayServiceImpl")
+public class CardPayServiceImpl implements CardPayService {
+	
+	private Logger logger = Logger.getLogger(getClass());
+	
+	@Resource(name="pullOrderServiceImpl")
+	private PullOrderService pullOrderService;
+	
+	@Resource(name="phpCommServiceImpl")
+	private PHPCommService phpCommService;
+	
+	@Resource(name="cloudCoreServiceImpl")
+	private CloudCoreService cloudCoreService;
+	
+	@Autowired
+	URLProfile urlProfile;
+	
+	@Override
+	public String pay(Map<String, String> paramMap) {
+		logger.info("** 刷卡支付下单 - 入参：" + DateChangeTools.bean2gson(paramMap));
+		String order_num = paramMap.get("order_num");
+		String auth_code = paramMap.get("auth_code");
+		String ipAddress = paramMap.get("ipAddress");
+		// 验参
+		if(null == order_num || "".equals(order_num) ||
+				null == auth_code || "".equals(auth_code)) {
+			logger.info("** 刷卡支付下单 - 参数为空。");
+			return ResultTools.setResponse(CodeConstants.参数为空.getCode());
+		}
+		// 取出订单部分信息
+		ScanpayVO scanpayVO = cloudCoreService.findScanVOByOrderNum(order_num);
+		logger.info("** 刷卡支付下单 - 订单基本信息：" + DateChangeTools.bean2gson(scanpayVO));
+		if(null == scanpayVO) {
+			logger.info("** 刷卡支付下单 - 云端订单不存在。");
+			return ResultTools.setResponse(CodeConstants.云端订单不存在.getCode());
+		}
+		// 获取云端缴费状态和信息
+		OrderResponse orderResponse = phpCommService.getOrder(scanpayVO);
+		logger.info("** 刷卡支付下单 - 订单缴费信息：" + DateChangeTools.bean2gson(orderResponse));
+		if(null == orderResponse) {
+			logger.info("** 刷卡支付下单 - 云端缴费状态和金额为空。");
+			return ResultTools.setResponse(CodeConstants.云端缴费状态和金额为空.getCode());
+		}
+		// 判断车辆是否离场
+		if(orderResponse.getStatus()==1 && orderResponse.getService_status() ==2) {
+			logger.info("** 刷卡支付下单 - 车辆已离场。status=1(不欠费) && service_status=2(已完成)");
+			return ResultTools.setResponse(CodeConstants.车辆已离场.getCode());
+		}
+		// 提取未支付费用、上次缴费、缴费状态
+		float unpayPrice = orderResponse.getUnpay_price();
+		int payTime = orderResponse.getPay_time();
+		int status = orderResponse.getStatus();
+		// 计算时间差(上次缴费到当前的时间差)
+		String payTimeStr = DateTools.secondTostring(payTime);
+		long timeSubtract = DateTools.time_interval(payTimeStr, DateTools.secondTostring(DateTools.phpNowDate()));
+		// 判断是否重复扫码
+		if(status == 1 && (timeSubtract <= ParkConfig.overtime || unpayPrice == 0 && payTime > 0)) {
+			logger.info("** 刷卡支付下单 - 重复扫码。status=1(不欠费) && (时间差<超时时间 || unpay_price=0 && pay_time>0(缴过费))");
+			return ResultTools.setResponse(CodeConstants.重复扫码.getCode());
+		}
+		// 判断是否在免费时长内
+		if(status == 1 && unpayPrice == 0 && payTime == 0) {
+			logger.info("** 刷卡支付下单 - 无需缴费。status=1(不欠费) && unpay_price=0 && pay_time=0");
+			return ResultTools.setResponse(CodeConstants.无需缴费.getCode());
+		}
+		// 判断订单状态是否正常
+		if(status != 2 && status != 3) {
+			logger.info("** 刷卡支付下单 - 订单状态异常。status!=2 && status!=3");
+			return ResultTools.setResponse(CodeConstants.订单状态异常.getCode());
+		}
+		// 区分是微信还是支付宝
+		int authCodePre = Integer.parseInt(auth_code.substring(0, 2));
+		int pay_way = 0;
+		String trade_type = "";
+		if(authCodePre >= 10 && authCodePre <= 15) {
+			pay_way = 3;
+			trade_type = "WEIXIN";
+		}else if(authCodePre >= 25 && authCodePre <= 30) {
+			pay_way = 1;
+			trade_type = "ZHIFUBAO";
+		}else {
+			logger.info("** 刷卡支付下单 - pay_way参数值错误：auth_code = " + auth_code);
+			return ResultTools.setResponse(CodeConstants.参数错误.getCode());
+		}
+		String order_num_pay = createOrderPay(orderResponse, pay_way);
+		if("".equals(order_num_pay)) {
+			logger.info("** 刷卡支付下单 - 创建子订单失败。");
+			return ResultTools.setResponse(CodeConstants.创建子订单失败.getCode());
+		}
+		// 获取parkid
+		String parkid = scanpayVO.getParkid();
+		// 进入刷卡支付
+		CardPayThread cardPayThread = new CardPayThread(unpayPrice, parkid, order_num_pay, trade_type, auth_code, ipAddress);
+		cardPayThread.setUrlProfile(urlProfile);
+		cardPayThread.setCloudCoreService(cloudCoreService);
+		Thread paying = new Thread(cardPayThread);
+		paying.start();
+		Map<String, String> resultMap = new HashMap<String, String>();
+		resultMap.put("order_num_pay", order_num_pay);
+		logger.info("** 刷卡支付下单 - 调起支付成功。");
+		return ResultTools.setObjectResponse(CodeConstants.成功.getCode(), resultMap);
+	}
+	
+	public String createOrderPay(OrderResponse orderResponse, int pay_way) {
+		OrderPayRecord orderPayRecord = new OrderPayRecord();
+		orderPayRecord.setOrderNum(orderResponse.getOrderid());
+		orderPayRecord.setTradeNo(OrderNumTools.creatOrderNum());
+		orderPayRecord.setCostBefore(String.valueOf(orderResponse.getTotal_price()));
+		orderPayRecord.setCostAfter(String.valueOf(orderResponse.getUnpay_price()));
+		orderPayRecord.setDiscountAmount(String.valueOf(orderResponse.getDiscount_price()));
+		orderPayRecord.setPayStatus("1");
+		orderPayRecord.setPayWay(String.valueOf(pay_way));
+		orderPayRecord.setCreateTime(String.valueOf(DateTools.phpNowDate()));
+		
+		int addResult = cloudCoreService.addOrderPayRecord(orderPayRecord);
+		if(addResult > 0) {
+			return orderPayRecord.getTradeNo();
+		}
+		return "";
+	}
+
+	@Override
+	public String query(String order_num_pay) {
+		logger.info("** 刷卡支付结果查询 - 参数：order_num_pay = " + order_num_pay);
+		String status = "";
+		OrderPayRecord orderPayRecord = cloudCoreService.findOrderPayRecordByTradeNo(order_num_pay);
+		Integer payStatus = Integer.valueOf(orderPayRecord.getPayStatus());
+		logger.info("** 刷卡支付结果查询  - 取出值：" + payStatus + "（1-未缴费；2-已缴费；3-已取消。）");
+		if(null != payStatus) {
+			switch(payStatus) {
+				case 1:status="INTRADING";break;
+				case 2:status="SUCCESS";break;
+				case 3:status="FAIL";break;
+			}
+		}else {
+			logger.info("** 刷卡支付结果查询  - 取出值为空，返回参数解析错误。");
+			return ResultTools.setResponse(CodeConstants.参数解析错误.getCode());
+		}
+		Map<String, String> resultMap = new HashMap<String, String>();
+		resultMap.put("order_num_pay", order_num_pay);
+		resultMap.put("status", status);
+		logger.info("** 刷卡支付结果查询  - 返回结果：order_num_pay = " + order_num_pay + "，status = " + status);
+		return ResultTools.setObjectResponse(CodeConstants.成功.getCode(), resultMap);
+	}
+	
+}

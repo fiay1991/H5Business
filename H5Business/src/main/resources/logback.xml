@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<!-- 用来定义变量值的标签，<property> 有两个属性，name和value；其中name的值是变量的名称，value的值时变量定义的值。通过<property>定义的值会被插入到logger上下文中。定义变量后，可以使“${}”来使用变量 -->
-	<property name="LOG_DIR" value="${catalina.base}/logs/H5Business"/>
+	<property name="LOG_DIR" value="${catalina.base}/logs/ScanPay"/>
 	<!-- 控制台 -->
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder charset="UTF-8">
@@ -51,8 +51,8 @@
 		</encoder>
 	</appender>
 
-	<appender name="H5BUSINESS_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOG_DIR}/H5Business_info.log</file>
+	<appender name="SCANPAY_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR}/ScanPay_info.log</file>
 		<append>true</append>
 		<filter class="ch.qos.logback.classic.filter.LevelFilter">
 			<level>INFO</level>
@@ -60,7 +60,7 @@
 			<onMismatch>DENY</onMismatch>
 		</filter>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${LOG_DIR}/H5Business_info.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<fileNamePattern>${LOG_DIR}/ScanPay_info.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
 			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
 				<maxFileSize>100MB</maxFileSize>
 			</timeBasedFileNamingAndTriggeringPolicy>
@@ -72,8 +72,8 @@
 		</encoder>
 	</appender>
 
-	<appender name="H5BUSINESS_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOG_DIR}/H5Business_error.log</file>
+	<appender name="SCANPAY_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR}/ScanPay_error.log</file>
 		<append>true</append>
 		<filter class="ch.qos.logback.classic.filter.LevelFilter">
 			<level>ERROR</level>
@@ -81,7 +81,7 @@
 			<onMismatch>DENY</onMismatch>
 		</filter>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${LOG_DIR}/H5Business_error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<fileNamePattern>${LOG_DIR}/ScanPay_error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
 			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
 				<maxFileSize>100MB</maxFileSize>
 			</timeBasedFileNamingAndTriggeringPolicy>
@@ -102,8 +102,8 @@
 	
 	<logger name="com.park" level="INFO" additivity="false">
 		<appender-ref ref="CONSOLE" />
-		<appender-ref ref="H5BUSINESS_INFO" />
-		<appender-ref ref="H5BUSINESS_ERROR" />
+		<appender-ref ref="SCANPAY_INFO" />
+		<appender-ref ref="SCANPAY_ERROR" />
 	</logger>
 	
 	<!-- 日志级别 --> 

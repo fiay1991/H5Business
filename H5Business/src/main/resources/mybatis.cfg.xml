@@ -5,9 +5,7 @@
 	<!-- 类的别名，定义别名后使用时不需要一大串包名的类全名 -->
 	<typeAliases>
 		<!-- liuyang -->
-		<typeAlias alias="Demo" type="com.park.h5business.domain.Demo" />
-		<typeAlias alias="ScanpayVO" type="com.park.h5business.vo.ScanpayVO" />
-		<typeAlias alias="OrderInfo" type="com.park.h5business.domain.OrderInfo"/>
-		<typeAlias alias="OrderPayRecord" type="com.park.h5business.domain.OrderPayRecord"/>
+		<typeAlias alias="Demo" type="com.park.scanpay.domain.Demo" />
+		<typeAlias alias="NoPlateRecord" type="com.park.scanpay.domain.noplate.NoPlateRecord"/>
 	</typeAliases>
 </configuration>

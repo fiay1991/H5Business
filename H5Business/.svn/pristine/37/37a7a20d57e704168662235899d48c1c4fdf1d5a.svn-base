@@ -1,0 +1,320 @@
+/**
+ * 
+ */
+package com.park.scanpay.service.impl.noplate;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.ui.Model;
+
+import com.park.scanpay.config.constants.NoPlateConstants;
+import com.park.scanpay.dao.impl.noplate.NoPlateDaoImpl;
+import com.park.scanpay.domain.noplate.NoPlateRecord;
+import com.park.scanpay.factory.DestributeFactory;
+import com.park.scanpay.profile.URLProfile;
+import com.park.scanpay.response.OrderResponse;
+import com.park.scanpay.service.BusinessService;
+import com.park.scanpay.service.PHPCommService;
+import com.park.scanpay.service.PlateService;
+import com.park.scanpay.service.noplate.NoPlateService;
+import com.park.scanpay.tools.BackResultTools;
+import com.park.scanpay.tools.DateTools;
+import com.park.scanpay.tools.StringTool;
+import com.park.scanpay.tools.TempPlateTools;
+import com.park.scanpay.vo.ScanpayVO;
+
+/**
+ * 无牌车进出场
+ * 
+ * @author fangct created on 2017年12月15日
+ */
+@Repository(value = "noPlateServiceImpl")
+public class NoPlateServiceImpl implements NoPlateService {
+
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	@Autowired
+	URLProfile urlProfile;
+
+	@Resource(name = "destributeFactory")
+	private DestributeFactory destributeFactory;
+
+	@Resource(name = "noPlateDaoImpl")
+	private NoPlateDaoImpl noPlateDaoImpl;
+
+	@Resource(name = "phpCommServiceImpl")
+	private PHPCommService phpCommService;
+
+	@Resource(name = "plateServiceImpl")
+	private PlateService plateService;
+	
+	/**
+	 * @param code
+	 * @param parkid
+	 * @param channelid
+	 * @param type
+	 * @param ver
+	 * @param useragent
+	 * @param useragent2 
+	 * @param model
+	 * @return
+	 */
+	public String entering(String alicode,String code, String parkid, String channelid, String type, String ver, String useragent,
+			 Model model) {
+		String msg = "无牌车进场失败，请稍后重试";// 默认错误信息提示
+		String page = "h5_error";// 默认跳转页面
+
+		/*** 验证参数 */
+		if (parkid != null && !parkid.equals("") && channelid != null && !channelid.equals("")) {
+			BusinessService bs = destributeFactory.create(useragent);
+			String openid = bs.generateOpenid(alicode, code);
+			String temp_plate = TempPlateTools.createTempPlate();
+			int enter_time = DateTools.phpNowDate();
+
+			NoPlateRecord record = new NoPlateRecord();
+			record.setPark_id(Integer.parseInt(parkid));
+			record.setChannel_id(channelid);
+			record.setEnter_time(enter_time);
+			record.setTemp_plate(temp_plate);
+			record.setOpenid(openid);
+
+			int n = noPlateDaoImpl.insertEnterInfo(record);
+			if (n > 0) {
+				logger.info("***无牌车进场-数据写入成功, {}", record.toString());
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("temp_plate", temp_plate);
+				map.put("enter_time", enter_time);
+				map.put("channel_id", channelid);
+				return BackResultTools.setValue("h5_noplatenter", map, model);
+			} else {
+				logger.error("***无牌车进场-插入进场数据失败, {}", record.toString());
+				/*** 跳转到错误页面 */
+				msg += "(保存车牌错误)";
+				return BackResultTools.setValue(page, msg, model);
+			}
+		} else {
+			logger.error("参数为空.." + "parkid=" + parkid + "** channelid=" + channelid);
+			msg += "(参数为空)";
+			return BackResultTools.setValue(page, msg, model);
+		}
+	}
+
+	/**
+	 * 无牌车预缴费，根据openid获取车牌
+	 * @param code
+	 * @param parkid
+	 * @param ver
+	 * @param useragent
+	 * @param model
+	 * @return
+	 */
+	public String noPlatePrepay(String alicode, String code, String parkid, String useragent,
+			Model model) {
+		/*** 验证参数 */
+		if ((code != null && !code.equals("")) || (alicode != null && !alicode.equals(""))) {
+			BusinessService bs = destributeFactory.create(useragent);
+			String openid = bs.generateOpenid(alicode, code);
+			if (openid == null) {
+				logger.info("***无牌车预缴费-获取openid失败,");
+			}else {
+				model.addAttribute("openid", openid);
+				NoPlateRecord record = noPlateDaoImpl.selectTempPlateInfo(openid);
+				if (record != null) {
+					logger.info("***无牌车预缴费-已匹配到无牌车进场数据: {}", record.toString());
+					String temp_plate = record.getTemp_plate();
+					return plateService.platepay("" + record.getPark_id(), temp_plate, useragent, model);
+				}
+			}
+		}
+		logger.info("***无牌车预缴费-未匹配到无牌车进场数据，手输车牌.");
+		return "h5_plate";
+	}
+	@Override
+	public String exiting(String alicode, String code, String parkid, String channelid, String type, String ver, String useragent,
+			Model model) {
+		String msg = "无牌车离场失败，请稍后重试";// 默认错误信息提示
+		String page = "h5_error";// 默认跳转页面
+
+		/*** 验证参数 */
+		if (parkid != null && !parkid.equals("") && channelid != null && !channelid.equals("")) {
+			BusinessService bs = destributeFactory.create(useragent);
+			String openid = bs.generateOpenid(alicode, code);
+			model.addAttribute("openid",openid);
+			int exit_time = DateTools.phpNowDate();
+
+			NoPlateRecord record = noPlateDaoImpl.selectTempPlateInfo(openid);
+			if (record != null) {
+				logger.info("***无牌车离场-已匹配到无牌车进场数据: {}", record.toString());
+
+				/**
+				 * 判断是否入场
+				 */
+				if (record.getStatus() == NoPlateConstants.待入场.getValue()) {
+					/*** 跳转到错误页面 */
+					msg += "(未找到主相关订单信息)";
+					return BackResultTools.setValue(page, msg, model);
+				}
+				
+				NoPlateRecord updateParams = new NoPlateRecord();
+				updateParams.setExit_time(exit_time);
+				updateParams.setId(record.getId());
+				
+				String temp_plate = record.getTemp_plate();
+				ScanpayVO scanpayVO = getScanpayVO(parkid, temp_plate, ver);
+				try {
+					/*** 根据信息查询主订单 */
+//					OrderInfo orderInfo = orderInfoDao.getOrderInfo(scanpayVO);
+					String orderNum = "17121813573710440";
+					if (StringTool.isNotNull(orderNum)) {
+						scanpayVO.setOrderid(orderNum);
+//						scanpayVO.setOrderid(orderInfo.getOrder_num());
+						/*** 获取用户在云端的缴费状态和金额 */
+						OrderResponse orderResponse = phpCommService.getOrder(scanpayVO);
+						/**
+						 * 判断是否在免费时长内
+						 */
+						if (isFree(orderResponse)) {
+							logger.info("无牌车离场-无待缴费,临牌号: {}", temp_plate);
+							//修改为待离场状态
+							updateParams.setStatus(NoPlateConstants.待离场.getValue());
+							updateNoPlateRecord(updateParams);
+							
+							Map<String, Object> map = new HashMap<String, Object>();
+							map.put("temp_plate", temp_plate);
+							map.put("enter_time", record.getEnter_time());
+							map.put("exit_time", exit_time);
+							map.put("channel_id", channelid);
+							return BackResultTools.setValue("h5_noplatexit", map, model);
+						} else {
+							logger.info("无牌车离场-跳到车牌支付,临牌车: {}", temp_plate);
+							//修改为待支付状态
+							updateParams.setStatus(NoPlateConstants.待支付.getValue());
+							updateNoPlateRecord(updateParams);
+							
+							return plateService.platepay(parkid, temp_plate, useragent, model);
+						}
+					} else {
+						/*** 跳转到错误页面 */
+						logger.error("根据车场id和车牌未找到订单相关信息.. parkid=" + parkid + " ** plate=" + scanpayVO.getPlate()
+								+ " ** ticketid =" + scanpayVO.getTicketid());
+						msg += "(未找到主相关订单信息)";
+						return BackResultTools.setValue(page, msg, model);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error("***无牌车离场-离场时间更新失败, temp_plate: {}, exit_time: {}", record.getTemp_plate(), exit_time);
+					/*** 跳转到错误页面 */
+					msg += "(查询费用失败)";
+					return BackResultTools.setValue(page, msg, model);
+				}
+			} else {
+				logger.error("***未匹配到无牌车进场数据, openid: {}", openid);
+				/*** 跳转到错误页面 */
+				msg += "(未匹配到入场数据)";
+				return BackResultTools.setValue(page, msg, model);
+			}
+
+		} else {
+			logger.error("参数为空.." + "parkid=" + parkid + "** channelid=" + channelid);
+			msg += "(参数为空)";
+			return BackResultTools.setValue(page, msg, model);
+		}
+	}
+
+	/**
+	 * 更新无牌车记录
+	 * @param record
+	 * @return
+	 */
+	public boolean updateNoPlateRecord(NoPlateRecord record) {
+		int n = noPlateDaoImpl.updateExitInfo(record);
+		if (n > 0) {
+			logger.info("***无牌车离场-离场时间和状态更新成功, temp_plate: {}, exit_time: {}", record.getTemp_plate(),
+					record.getExit_time());
+			return true;
+		} else {
+			logger.error("***无牌车离场-离场时间和状态更新失败, temp_plate: {}, exit_time: {}", record.getTemp_plate(),
+					record.getExit_time());
+			return false;
+		}
+	}
+
+	/**
+	 * @return
+	 */
+	public ScanpayVO getScanpayVO(String parkid, String plate, String ver) {
+		ScanpayVO scanpayVO = new ScanpayVO();
+		scanpayVO.setParkid(parkid);
+		scanpayVO.setPlate(plate);
+		scanpayVO.setVer(ver);
+		return scanpayVO;
+	}
+
+	/**
+	 * 判断是否有费用
+	 */
+	public boolean isFree(OrderResponse orderResponse) {
+		if (orderResponse.getStatus() == 1 && orderResponse.getUnpay_price() == 0) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public String redirect2NoPlateEnEx(String parkid, String type, String channelid, String ver, String useragent, Model model) {
+		String msg = "无牌车进场失败，请稍后重试";// 默认错误信息提示
+		String page = "h5_error";// 默认跳转页面
+		/*** 验证参数 */
+		if (null == parkid || null == ver || "".equals(ver) || null == channelid || "".equals(channelid)) {
+			logger.error(
+					"参数为空.." + "parkid=" + parkid + "** type=" + type + "** channelid=" + channelid + " ** ver=" + ver);
+			msg += "(参数为空)";
+			return BackResultTools.setValue(page, msg, model);
+		}
+		String urlparams = "";
+		try {
+			useragent = URLEncoder.encode(useragent, "UTF-8");
+			urlparams = "parkid=" + parkid + "&type=" + type + "&channelid=" + channelid + "&ver=" + ver + "&useragent="
+					+ useragent;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		
+		BusinessService bs = destributeFactory.create(useragent);
+		String self_url=urlProfile.getNOPLATEREDIRURL()+"?"+urlparams;
+		return "redirect:" + bs.redirectURL(self_url);
+	}
+
+	@Override
+	public String redirect2GetPlate(String parkid, String useragent,
+			Model model) {
+		String page = "h5_plate";// 默认跳转页面
+		/*** 验证参数 */
+		if (null == parkid || "".equals(parkid) || "null".equals(parkid)) {
+			logger.info(
+					"无牌车场内支付-缺少必填参数.." + " ** parkid=" + parkid);
+			return BackResultTools.setValue(page, "", model);
+		}
+		String urlparams = "";
+		try {
+			useragent = URLEncoder.encode(useragent, "UTF-8");
+			urlparams = "parkid=" + parkid + "&type=" + NoPlateConstants.预缴费.getValue()  + "&useragent="
+					+ useragent;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		
+		BusinessService bs = destributeFactory.create(useragent);
+		String self_url= urlProfile.getNOPLATEREDIRURL()+"?"+urlparams;
+		return "redirect:" + bs.redirectURL(self_url);
+	}
+}

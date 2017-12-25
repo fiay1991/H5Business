@@ -1,0 +1,152 @@
+package com.park.scanpay.service.impl;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.ui.Model;
+
+import com.park.base.common.HttpTools;
+import com.park.scanpay.dao.OrderPayRecordDao;
+import com.park.scanpay.domain.OrderPayRecord;
+import com.park.scanpay.domain.response.AliAuthReponse;
+import com.park.scanpay.domain.response.TokenReponse;
+import com.park.scanpay.profile.URLProfile;
+import com.park.scanpay.service.BusinessService;
+import com.park.scanpay.service.UnifiedOrderService;
+import com.park.scanpay.tools.DateChangeTools;
+import com.park.scanpay.tools.RSATools;
+import com.park.scanpay.tools.StringTool;
+
+@Repository(value = "alipayServiceImpl")
+public class AlipayServiceImpl extends BaseServiceImpl implements BusinessService {
+	@Autowired
+	URLProfile urlProfile;
+
+	@Resource(name = "orderPayRecordDaoImpl")
+	private OrderPayRecordDao orderPayRecordDao;
+
+	@Resource(name = "unifiedOrderServiceImpl")
+	private UnifiedOrderService unifiedOrderService;
+	
+	private Logger logger = Logger.getLogger(getClass());
+
+	@Override
+	public String redirectURL(String self_url) {
+		logger.info("** 支付宝重定向地址：" + self_url);
+		try {
+			self_url = URLEncoder.encode(self_url, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		String redirect_url = "";
+		String appid = urlProfile.getALIPAYAPPID();
+		redirect_url = "https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id=" + appid
+				+ "&scope=auth_base&redirect_uri=" + self_url;
+		logger.info("** 支付宝支付请求(重定向) - redirect_url：" + redirect_url);
+		return redirect_url;
+	}
+
+	public String creatOrder(String order_num, float total_price, float unpay_price, float discount_amount,
+			String code) {
+		OrderPayRecord orderPayRecord = getOrderPayRecord(order_num, total_price, unpay_price, discount_amount);
+		orderPayRecord.setPay_way(1);
+//		int result = orderPayRecordDao.add(orderPayRecord);
+//		if (result > 0) {
+			return orderPayRecord.getOrder_num_pay();
+//		}
+//		return null;
+	}
+
+	@Override
+	public boolean getUnifiedorder(String alicode, String code, String orderid, String parkid, float free, Model model) {
+		Map<String, String> idMap = getAccAndUserid(alicode);
+		if(null == idMap || idMap.isEmpty()) {
+			logger.info("** 支付宝获取userid的map为空：" + idMap);
+			return false;
+		}
+		String userid = idMap.get("user_id");
+		String accesstoken = idMap.get("access_token");
+		String result = unifiedOrderService.AliPayunifiedOrder(orderid, parkid, free, userid, accesstoken);
+		if (StringTool.isNotNull(result)) {
+			model.addAttribute("unifiedorder", result);
+			model.addAttribute("terminal", "AliPay");
+			return true;
+		} else {
+			logger.info("支付中心返回结果：" + "错误代码=" + result);
+			return false;
+		}
+	}
+
+	@Override
+	public String generateOpenid(String alicode, String code) {
+		Map<String, String> accAndUserid = getAccAndUserid(alicode);
+		if(null == accAndUserid || accAndUserid.isEmpty()) {
+			logger.info("** 支付宝获取userid的map为空：" + accAndUserid);
+			return null;
+		}
+		return accAndUserid.get("user_id");
+	}
+
+	public Map<String, String> getAccAndUserid(String alicode){
+		String aliInfoUrl = urlProfile.getALIURL();
+		String rsa_private_key = urlProfile.getALIPAYPRIVATEKEY();
+		String alipay_public_key = urlProfile.getALIPAYALIPUBLICKEY();
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("app_id", urlProfile.getALIPAYAPPID());
+		paramMap.put("method", "alipay.system.oauth.token");
+		paramMap.put("sign_type", "RSA2");
+		paramMap.put("version", "1.0");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String timestamp = sdf.format(new Date());
+		paramMap.put("timestamp", timestamp);
+		paramMap.put("charset", "UTF-8");
+		paramMap.put("code", alicode);
+		paramMap.put("grant_type", "authorization_code");
+		String linkStringForSign = DateChangeTools.createLinkString(paramMap);
+		logger.info("** 支付宝获取userid预发送参数：" + linkStringForSign);
+		String sign = RSATools.sign(linkStringForSign, rsa_private_key);
+		paramMap.put("sign", sign);
+		try {
+			sign = URLEncoder.encode(sign, "UTF-8");
+			paramMap.put("sign", sign);
+			timestamp = URLEncoder.encode(timestamp, "UTF-8");
+			paramMap.put("timestamp", timestamp);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		String result = HttpTools.HttpClientGet(aliInfoUrl, DateChangeTools.createLinkString(paramMap), null);
+		AliAuthReponse aliAuthReponse = DateChangeTools.gson2bean(result, AliAuthReponse.class);
+		logger.info("** 支付宝获取userid返回结果：" + result);
+		TokenReponse alipayOauthResponse = aliAuthReponse.getAlipay_system_oauth_token_response();
+		Map<String, String> resultMap = new HashMap<String, String>();
+		resultMap.put("access_token", alipayOauthResponse.getAccess_token());
+		resultMap.put("alipay_user_id", alipayOauthResponse.getAlipay_user_id());
+		resultMap.put("expires_in", alipayOauthResponse.getExpires_in());
+		resultMap.put("re_expires_in", alipayOauthResponse.getRe_expires_in());
+		resultMap.put("refresh_token", alipayOauthResponse.getRefresh_token());
+		resultMap.put("user_id", alipayOauthResponse.getUser_id());
+		String verifyString = DateChangeTools.map2SortJSON(resultMap);
+		boolean verify = RSATools.verify(verifyString, aliAuthReponse.getSign(), alipay_public_key);
+		if(!verify) {
+			logger.info("** 支付宝获取userid返回结果验签失败！");
+			return null;
+		}
+		TokenReponse aliInfo = aliAuthReponse.getAlipay_system_oauth_token_response();
+		String user_id = aliInfo.getUser_id();
+		String access_token = aliInfo.getAccess_token();
+		logger.info("** 支付宝获取userid返回结果验签成功，user_id=" + user_id + "，access_token=" + access_token);
+		Map<String, String> returnMap = new HashMap<String, String>();
+		returnMap.put("user_id", user_id);
+		returnMap.put("access_token", access_token);
+		return returnMap;
+	}
+}

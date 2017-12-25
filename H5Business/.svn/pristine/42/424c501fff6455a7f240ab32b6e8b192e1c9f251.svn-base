@@ -1,0 +1,20 @@
+package com.park.scanpay.dao.impl;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.park.scanpay.dao.ParkDao;
+import com.park.scanpay.mapper.ParkMapper;
+@Repository(value="parkDaoImpl")
+public class ParkDaoImpl implements ParkDao {
+
+	@Resource(name="parkMapper")
+	private ParkMapper parkMapper;
+	@Override
+	public String getParkKey(String parkid) {
+		
+		return parkMapper.getParkKey(parkid);
+	}
+
+}

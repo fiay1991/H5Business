@@ -1,0 +1,24 @@
+package com.park.scanpay.service.impl;
+
+import com.park.scanpay.domain.OrderPayRecord;
+import com.park.scanpay.tools.DateTools;
+import com.park.scanpay.tools.OrderNumTools;
+
+public class BaseServiceImpl {
+	
+	
+	public OrderPayRecord  getOrderPayRecord(String order_num,float total_price,float unpay_price,float discount_amount){
+		OrderPayRecord orderPayRecord =new OrderPayRecord();
+		orderPayRecord.setOrderNum(order_num);
+		String order_num_pay=OrderNumTools.creatOrderNum();
+		orderPayRecord.setTradeNo(order_num_pay);
+		orderPayRecord.setCostAfter(String.valueOf(unpay_price));
+		orderPayRecord.setCostBefore(String.valueOf((total_price)));
+		orderPayRecord.setDiscountAmount(String.valueOf((discount_amount)));
+		orderPayRecord.setCreateTime(String.valueOf(DateTools.phpNowDate()));
+		orderPayRecord.setUpdateTime(String.valueOf(DateTools.phpNowDate()));
+		orderPayRecord.setPayStatus("1");
+		return orderPayRecord;
+	}
+	
+}

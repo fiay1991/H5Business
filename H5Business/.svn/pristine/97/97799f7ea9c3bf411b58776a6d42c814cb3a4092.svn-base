@@ -1,0 +1,47 @@
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/alpha_database?useUnicode=true&amp;characterEncoding=utf-8
+spring.datasource.username=root
+spring.datasource.password=sa
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+spring.datasource.initial-size = 100
+spring.datasource.max-active=0
+spring.datasource.max-idle = 50
+spring.datasource.min-idle = 30
+spring.datasource.max-wait = 60000
+#mysql数据库-自动重新链接
+spring.datasource.test-on-borrow=true
+spring.datasource.validationQuery=SELECT 1
+#mysql数据库-慢查询日志
+spring.datasource.jdbc-interceptors=ConnectionState;SlowQueryReport(threshold=3000)
+#是否自我中断, 默认是 false
+spring.datasource.removeAbandoned=true
+#几秒后会自我中断, removeAbandoned 必须为 true
+spring.datasource.removeAbandonedTimeout=60
+#失效检查线程运行时间间隔，如果小于等于0，不会启动检查线程，默认-1
+spring.datasource.timeBetweenEvictionRunsMillis=120000
+#大于0 ，进行连接空闲时间判断，或为0，对空闲的连接不进行验证；默认30分钟
+spring.datasource.minEvictableIdleTimeMillis=300000
+
+#PHP 接口地址
+URLProfile.PHPSERVER=http://alpha_api.51park.cn/
+#PHP 修改订单 接口地址
+URLProfile.PHPORDERSERVER=http://alphaapi.51park.cn/
+# 统一下单接口
+URLProfile.UnifiedOrder=http://192.168.1.98:8080/PayController/
+#查询订单接口
+URLProfile.FINDORDER=http://192.168.1.98:8080/PayController/
+#http://192.168.1.98:8080/PayCenter/PayController/
+#获取用户openid的重定向地址
+URLProfile.REDIRURL=http://192.168.1.26:8080/ScanPay/pull/pullorder
+#无牌车重定向地址
+URLProfile.NOPLATEREDIRURL=http://192.168.1.26:8080/ScanPay/pull/noplate
+#支付宝支付成功回调地址
+URLProfile.RETURNURL=http://192.168.1.26:8080/ScanPay/scan/alipayupdate
+#微信appid
+URLProfile.WEIXINAPPID=wxb6cdc30864ede694
+
+URLProfile.WEIXINAPPSECRET=119c7f6b98baff55f18f78975ec0f416
+#微信支付成功回调地址
+URLProfile.WXRETURNURL=http://localhost:8080/scan/update?
+
+#电子发票的接口地址
+URLProfile.EINVOICE=http://192.168.1.29:8088/EinvoiceH5/einv
