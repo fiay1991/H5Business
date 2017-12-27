@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html class="loading" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>无忧停车-入场</title>
+<meta charset="UTF-8"/>
+<meta name="keywords" content="无忧停车网,手机支付"/>
+<meta name="description" content="无忧停车手机支付二维码"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta content="telephone=no" name="format-detection"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" id="links"/>
+<link rel="stylesheet" th:href="@{/css/base.2.0.css}"/>
+<link rel="stylesheet" th:href="@{/css/into.css}"/>
+<script type="text/javascript">
+var oldS=document.getElementById("links");if(oldS){oldS.parentNode.removeChild(oldS)}var t=document.createElement("meta");if(/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)){t.content="width=345,maximum-scale=1.09,user-scalable=no"}else{if(/(Android)/i.test(navigator.userAgent)){t.content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"}else{t.content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"}}t.name="viewport";t.id="a1";document.getElementsByTagName("head")[0].appendChild(t);
+</script>
+</head>
+
+<body>
+<!--loading star-->
+<div id="loading_mask">
+	<div class="spinner"></div>
+</div>
+<!--loading end-->
+
+<!--加载 star-->
+<div class="load">处理中...</div>
+<!--加载 end-->
+<div class="mask"></div>
+
+<!--主体 star-->
+<div class="wapper">
+
+	<ul class="list">
+		<li>车场名称<span class="n_r"><span th:text="${page.parkName}"></span></span></li>
+		<li>通道编号<span class="n_r"><span th:text="${page.channelId}"></span></span></li>
+		<li>临时车牌号<span class="n_r plate"><span th:text="${page.tempPlate}"></span></span></li>
+		<li>入场时间<span class="n_r"><span th:text="${page.enterTime}"></span></span></li>
+	</ul>	
+	
+	<section class="expens">
+		<p class="btn_make"><a href="javascript:void(0)" title="入场">入场</a></p>
+		<p class="prompt">提示:出入场扫码,请使用同一账号的APP</p>
+	</section>
+</div>
+<!--主体 end-->
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/tips.js}"></script>
+<script th:inline="javascript">
+//预加载loading
+$(window).bind('DOMContentLoaded',function(){
+	//400毫秒后执行，html对象移除loading样式
+	setTimeout(function(){					
+		 $('html').removeClass('loading');
+	},400);
+});	
+document.body.addEventListener('touchstart', function(){ }); 	
+
+//入场提交
+$(".btn_make").click(function(){
+
+	var pathName=document.location.pathname;
+	
+	var parkid=[[${parkid}]];
+	var openid = [[${openid}]];
+	var enexType = [[${enexType}]];
+	var parkName = [[${page.parkName}]];
+	var channelId = [[${page.channelId}]];
+	var tempPlate = [[${page.tempPlate}]];
+	var enterTime = [[${page.enterTime}]];
+	//执行AJAX
+	$.ajax({
+		type:"POST",
+		url:[[@{/noplate/sendenter}]],
+		dataType:'json', 
+		data:{
+			parkid:parkid,
+			openid:openid,
+			parkName:parkName,
+			channelId:channelId,
+			tempPlate:tempPlate,
+			enterTime:enterTime
+		}, 
+		timeout:30000,                             //设置超时时间（30秒）
+		//在发送请求之前调用
+		beforeSend:function () {
+			$(".load").show();
+			$(".mask").show();
+		},	
+		//成功
+		success: function (data) { 
+			//如果有数据
+			if(data.status_code=="200"){
+				setTimeout(function(){  
+					$(".load,.mask").hide();
+				},200);				
+
+			//其他（异常）	
+			}else{
+				$(".load,.mask").hide();
+			}
+			window.location.href=pathName.substring(0,pathName.substr(1).indexOf('/')+1) + data.url + "?enextype=" + enexType;
+		},
+		//失败
+		error: function (jqXHR, textStatus, errorThrown){ 	
+			if(textStatus=="timeout"){
+				$(".load,.mask").hide();
+				show_err_msg("网络超时");
+			}else{
+				$(".load,.mask").hide();
+				show_err_msg("异常重试");
+			}		
+		}			
+	})	
+})
+</script>
+</body>
+</html>

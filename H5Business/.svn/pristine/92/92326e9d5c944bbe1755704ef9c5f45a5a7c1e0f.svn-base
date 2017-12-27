@@ -1,0 +1,20 @@
+package com.park.scanpay.mapper;
+
+import org.springframework.stereotype.Repository;
+
+/**
+ * 
+ * @author WangYuefei
+ *
+ */
+@Repository(value="parkMapper")
+public interface ParkMapper {
+
+	/**
+	 * 通过parkid查询停车场名称
+	 * @param parkid
+	 * @return
+	 */
+	String selectParkNameByParkId(String parkid);
+
+}

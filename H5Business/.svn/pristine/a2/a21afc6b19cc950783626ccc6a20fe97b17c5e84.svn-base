@@ -1,0 +1,22 @@
+package com.park.scanpay.dao;
+
+import org.springframework.stereotype.Repository;
+
+/**
+ * 
+ * @author WangYuefei
+ *
+ */
+@Repository(value="parkDao")
+public interface ParkDao {
+
+	/**
+	 * 通过parkid获取车场名称
+	 * @param parkid 
+	 * @return
+	 */
+	String getParkNameByParkId(String parkid);
+		
+	
+	
+}

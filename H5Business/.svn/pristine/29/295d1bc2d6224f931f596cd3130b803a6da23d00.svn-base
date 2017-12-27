@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.park.scanpay.mapper.ParkMapper">
+	<!-- 定义数据库字段与实体对象的映射关系(SQL字段与类属性的映射关系，避免在SQL语句中使用as转换字段别名) -->
+
+	<select id="selectParkNameByParkId" resultType="string">
+		SELECT `name` FROM cp_park WHERE id=#{parkid}
+	</select>
+
+</mapper>

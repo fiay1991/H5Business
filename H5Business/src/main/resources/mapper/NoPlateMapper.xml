@@ -3,17 +3,17 @@
 
 <mapper namespace="com.park.scanpay.mapper.noplate.NoPlateMapper">
 
-	<insert id="insert" parameterType="NoPlateRecord">
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="NoPlateRecord">
 		INSERT INTO
-		cp_park_noplate_record(park_id, channel_id, temp_plate, enter_time,
-		openid)
-		VALUES(#{park_id},#{channel_id},#{temp_plate},#{enter_time},#{openid})
+		cp_park_noplate_record(park_id, park_name, en_channel_id, temp_plate, enter_time,openid)
+		VALUES(#{park_id},#{park_name},#{en_channel_id},#{temp_plate},#{enter_time},#{openid})
 	</insert>
 
 	<update id="update" parameterType="NoPlateRecord">
 		UPDATE cp_park_noplate_record
 		<set>
 			<if test="exit_time != null and exit_time != ''">exit_time=#{exit_time},</if>
+			<if test="ex_channel_id != null and ex_channel_id != ''">ex_channel_id=#{ex_channel_id},</if>
 			<if test="status != null and status != ''">status=#{status}</if>
 		</set>
 		WHERE	id=#{id}
@@ -25,6 +25,17 @@
 		cp_park_noplate_record
 		WHERE openid=#{openid}
 		ORDER BY enter_time DESC
+		LIMIT 1
+	</select>
+	
+	<select id="findOpenStauts" parameterType="String" resultType="String">
+		SELECT `status`
+		FROM cp_park_mq_send
+		WHERE 
+			park_id=#{park_id} 
+			AND business_code=#{business_code} 
+			AND business_key=#{business_key}
+		ORDER BY id DESC
 		LIMIT 1
 	</select>
 </mapper>

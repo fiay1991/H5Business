@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Implementation-Title: ScanPay
+Implementation-Title: ScanPay Maven Webapp
 Implementation-Version: 0.0.1-SNAPSHOT
 Built-By: 15647
 Implementation-Vendor-Id: com.park

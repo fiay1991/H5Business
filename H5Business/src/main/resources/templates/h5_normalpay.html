@@ -72,7 +72,7 @@ var oldS=document.getElementById("links");if(oldS){oldS.parentNode.removeChild(o
 					<span class="title">车牌号</span>
 					<div class="amount" th:if="${page.plate} =='null'" th:text="未识别"></div>
 					<div class="amount" th:if="${page.plate} &gt; 'null'" th:text="${page.plate}"></div>
-				</div>					
+				</div>
 				<div class="discount no">
 					<div class="sum">应付金额：<span class="red">￥<span th:text="${page.price}"></span></span></div>
 				</div>	

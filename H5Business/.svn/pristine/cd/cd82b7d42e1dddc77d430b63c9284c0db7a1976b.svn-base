@@ -1,0 +1,220 @@
+package com.park.scanpay.controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.park.scanpay.domain.OrderInfo;
+import com.park.scanpay.service.CloudCoreService;
+import com.park.scanpay.service.PlateService;
+import com.park.scanpay.service.ScanService;
+import com.park.scanpay.service.impl.noplate.NoPlateServiceImpl;
+
+@Controller
+@RequestMapping("/scan")
+public class ScanController {
+
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	@Resource(name = "scanServiceImpl")
+	private ScanService scanService;
+
+	@Resource(name = "plateServiceImpl")
+	private PlateService plateService;
+	
+	@Resource(name="cloudCoreServiceImpl")
+	private CloudCoreService cloudCoreService;
+
+	@Resource(name = "noPlateServiceImpl")
+	private NoPlateServiceImpl noPlateServiceImpl;
+
+	/**
+	 * 扫描公区二维码跳转到输入车牌页面
+	 * 
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "/parking", produces = "text/html;charset=UTF-8")
+	public String parking(HttpServletRequest request, Model model) {
+		// 取参
+		String parkid = request.getParameter("parkid");
+		String useragent = request.getHeader("user-agent");
+		String plate = request.getParameter("plate");
+		// 将parkid放入页面
+		model.addAttribute("parkid", parkid);
+		// 若plate为空，则跳转到输入车牌号页面
+		if (null == plate || "".equals(plate)) {
+			return noPlateServiceImpl.redirect2GetPlate(parkid, useragent, model);
+		} else {
+			// 若plate不为空，且包含多个，则跳转到选择车牌号页面
+			if (plate.contains(",")) {
+				String[] plates = plate.split(",");
+				List<String> plateList = new ArrayList<String>();
+				for (String pla : plates) {
+					plateList.add(pla.trim());
+				}
+				model.addAttribute("plateList", plateList);
+				return "h5_plates";
+				// 若plate不为空，只包含一个，直接微信redirect
+			} else {
+				// 如果只有一个车牌号，直接取parkid并拉取订单
+				// 通过车牌号查询订单数据
+				OrderInfo orderInfo = cloudCoreService.findOrderByPlate(parkid, plate);
+				// 验证订单是否存在，若不存在，返回错误页面
+				if (orderInfo == null) {
+					logger.info("** 单个车牌号，未找到该订单：parkid=" + parkid + "，plate=" + plate);
+					model.addAttribute("plate", plate);
+					return "h5_noplate";
+				}
+				if (parkid == null || parkid.equals("")) {
+					parkid = orderInfo.getParkId();
+				}
+				Map<String, String> paramMap = new HashMap<String, String>();
+				paramMap.put("parkid", parkid);
+				paramMap.put("plate", plate);
+				logger.info("** 单个车牌号，已找到订单：parkid=" + parkid + "，plate=" + plate);
+				return plateService.platepay(parkid, plate, useragent, model);
+			}
+		}
+	}
+
+	/**
+	 * 扫码二维码 无牌车进出场 本请求为get请求
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/noplate", produces = "text/html;charset=UTF-8")
+	public String noplateenter(HttpServletRequest request, HttpServletResponse response, Model model) {
+		/**
+		 * 获取参数
+		 */
+		String parkid = request.getParameter("parkid");// 停车场id
+		String type = request.getParameter("type");// 票/卡号
+		String channelid = request.getParameter("channelid");// 票/卡号
+		String ver = request.getParameter("ver");// 版本号
+		String useragent = request.getHeader("user-agent");// 主要区分微信/支付宝的标示
+		return noPlateServiceImpl.redirect2NoPlateEnEx(parkid, type, channelid, ver, useragent, model);
+	}
+
+	/**
+	 * 扫码二维码跳转地址 本请求为get请求
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/scanpay", produces = "text/html;charset=UTF-8")
+	public String scanpay(HttpServletRequest request, HttpServletResponse response, Model model) {
+		/**
+		 * 获取参数
+		 */
+		String parkid = request.getParameter("parkid");// 停车场id
+		String ticketid = request.getParameter("ticketid");// 票/卡号
+		String plate = request.getParameter("plate");// 车牌号
+		String ver = request.getParameter("ver");// 版本号
+		String useragent = request.getHeader("user-agent");// 主要区分微信/支付宝的标示
+		return scanService.scanpay(parkid, ticketid, plate, ver, useragent, model);
+	}
+
+	/**
+	 * 微信支付成功修改
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/update", produces = "text/html;charset=UTF-8")
+	public String updateOrder(HttpServletRequest request, Model model) {
+		System.out.println("修改微信入口...");
+		/**
+		 * 获取参数
+		 */
+		String trade_no = request.getParameter("trade_no");// 订单号
+		String price = request.getParameter("price");// 支付金额
+		String openid = request.getParameter("openid");
+		String prepayid = request.getParameter("prepayid");
+		String result = scanService.updateOrder(trade_no, price, openid, prepayid, model);
+		return result;
+	}
+
+	/**
+	 * 微信支付成功修改
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/weixinnotify", produces = "text/html;charset=UTF-8")
+	public String notifyOrder(HttpServletRequest request, Model model) {
+		System.out.println("微信支付异步通知入口...");
+		/**
+		 * 获取参数
+		 */
+		String trade_no = request.getParameter("trade_no");// 订单号
+		String price = request.getParameter("price");// 支付金额
+		String openid = request.getParameter("openid");
+		String prepayid = request.getParameter("prepayid");
+		String result = scanService.updateOrder(trade_no, price, openid, prepayid, model);
+		return result;
+	}
+
+	/**
+	 * 支付宝支付成功修改
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/alipayupdate", produces = "text/html;charset=UTF-8")
+	public String alipayupdateOrder(HttpServletRequest request, Model model) {
+		System.out.println("支付宝支付后返回入口...");
+		String sign_result = request.getParameter("sign_result");// 签名结果
+		// 未通过签名，直接返回错误
+		if ("fail".equals(sign_result)) {
+			System.out.println("订单号：" + request.getParameter("out_trade_no") + ",支付返回页面，签名未通过");
+			return "h5_error";
+		}
+		/**
+		 * 获取参数
+		 */
+		String trade_no = request.getParameter("trade_no");// 订单号
+		String price = request.getParameter("total_fee");// 支付金额
+		String result = scanService.alipayupdateOrder(trade_no, price, model);
+		return result;
+	}
+
+	/**
+	 * 支付宝支付成功修改
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/alipaynotify", produces = "text/html;charset=UTF-8")
+	public String alipaynotifyOrder(HttpServletRequest request, Model model) {
+		System.out.println("支付宝支付后异步通知入口...");
+		String sign_result = request.getParameter("sign_result");// 签名结果
+		// 未通过签名，直接返回错误
+		if ("fail".equals(sign_result)) {
+			System.out.println("订单号：" + request.getParameter("out_trade_no") + ",支付返回页面，签名未通过");
+			return "h5_error";
+		}
+		/**
+		 * 获取参数
+		 */
+		String order_num = request.getParameter("out_trade_no");// 订单号
+		String price = request.getParameter("total_fee");// 支付金额
+		String result = scanService.alipayupdateOrder(order_num, price, model);
+		return result;
+	}
+
+}
